@@ -1,8 +1,21 @@
-# :computer: IntelliJ 단축키 모음 (Windows)
+# :computer: IntelliJ 팁 및 단축키(Windows)
+
+## 팁
+
+- 자동 코드 접기 해제하기
+
+  File -> Settings -> Editor -> General -> Code Folding -> Imports나 One-line methods 등 기능 해제하고 싶은것들 체크 해제
 
 
+
+
+
+
+
+## 단축키
 
 - 컨트롤 쉬프트 F10 : 테스트
+
 - 컨트롤 알트 L : 코드 정렬
 - 알트 인설트 엔터 : 테스트 코드 생성
 - 컨트롤 B : 메서드 정의로 이동
