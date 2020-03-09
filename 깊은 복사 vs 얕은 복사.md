@@ -25,9 +25,9 @@ public class Person {
 public static void main(String[] args) {
     Person p1 = new Person("준호", 26);
     
-    Person p2 = p1;      //p1에서 p2로의 얕은 복사
+    Person p2 = p1;       //p1에서 p2로의 얕은 복사
     p2.setName("그래");   //p1.name도 변경된다.
-    p2.setAge(25);       //p1.age도 변경된다.
+    p2.setAge(25);        //p1.age도 변경된다.
 }
 ```
 
@@ -74,8 +74,8 @@ public static void main(String[] args) {
     Person p1 = new Person("준호", 26);
     
     Person p2 = (Person) p1.clone(); //p1에서 p2로의 깊은 복사
-    p2.setName("그래");   		  //p1.name은 변경 안된다.
-    p2.setAge(25);       			//p1.age은 변경 안된다.
+    p2.setName("그래");              //p1.name은 변경 안된다.
+    p2.setAge(25);                  //p1.age은 변경 안된다.
 }
 ```
 
@@ -96,7 +96,7 @@ public class Main {
                 new Person("a", 1), new Person("b", 2), new Person("c", 3)));
 
         List<Person> people2 = people1; //얕은 복사
-		people1.clear();				//people2의 모든 원소도 삭제된다.
+		people1.clear();                //people2의 모든 원소도 삭제된다.
     }
 }
 
@@ -113,11 +113,11 @@ public class Main {
                 new Person("a", 1), new Person("b", 2), new Person("c", 3)));
 
         List<Person> people2 = new ArrayList<>();//addAll사용전 초기화
-        people2.addAll(people1);				//깊은 복사
+        people2.addAll(people1);                 //깊은 복사
 		//List<Person> people2 = new ArrayList<>(people1); 위의 두 줄을 이와 같이 쓸 수도 있다.
         
-        people1.clear();						//people1의 모든 원소만 삭제될뿐,
-        										//people2엔 영향 없다
+        people1.clear();                         //people1의 모든 원소만 삭제될뿐,
+                                                 //people2엔 영향 없다
     }
 }
 ```
@@ -207,8 +207,8 @@ public class Main {
         //깊은복사이다. people2는 이제 add()등의 메서드 사용 불가
 		List<Person> people2 = Collections.unmodifiableList(new ArrayList<>(people1)); 
         
-        people1.clear();						//people1의 모든 원소만 삭제될뿐,
-        										//people2엔 영향 없다
+        people1.clear(); //people1의 모든 원소만 삭제될뿐,
+                         //people2엔 영향 없다
     }
 }
 
