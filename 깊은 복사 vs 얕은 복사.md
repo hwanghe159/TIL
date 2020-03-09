@@ -81,7 +81,7 @@ public static void main(String[] args) {
 
 
 
-
+ 
 
 ### ArrayList 복사
 
@@ -114,7 +114,8 @@ public class Main {
 
         List<Person> people2 = new ArrayList<>();//addAll사용전 초기화
         people2.addAll(people1);				//깊은 복사
-
+		//List<Person> people2 = new ArrayList<>(people1); 위의 두 줄을 이와 같이 쓸 수도 있다.
+        
         people1.clear();						//people1의 모든 원소만 삭제될뿐,
         										//people2엔 영향 없다
     }
@@ -175,7 +176,55 @@ public class Main {
 
 
 
+하지만 위와 같이 원소 하나하나 복사하고 앉아있기엔 너무 복잡하다.
 
+위와 같이 하는 이유는 '객체 상태를 변경하면 다른 객체도 변경될까봐' 인데 애초에 상태를 변경할 수 없다면 객체 하나하나 깊은 복사를 할 필요가 없지 않은가?
+
+Person객체가 [VO](https://mommoo.tistory.com/61)라면? (즉, setter 메서드가 없어서 상태를 변경할 수 없다면?) 
+
+객체의 상태 변화에 대해 걱정을 하지 않아도 된다.
+
+추가로, `Collections.unmodifiableList()`를 이용하면 리스트에 대한 수정을 막을 수 있다.
+
+```java
+public class Person {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+    /* setter 제거 */
+}
+
+
+public class Main {
+    public static void main(String[] args) {
+        List<Person> people1 = new ArrayList<>(Arrays.asList(
+                new Person("a", 1), new Person("b", 2), new Person("c", 3)));
+
+        //깊은복사이다. people2는 이제 add()등의 메서드 사용 불가
+		List<Person> people2 = Collections.unmodifiableList(new ArrayList<>(people1)); 
+        
+        people1.clear();						//people1의 모든 원소만 삭제될뿐,
+        										//people2엔 영향 없다
+    }
+}
+
+```
+
+
+
+
+
+> 우리가 이렇게 얕은 복사, 깊은 복사를 따지는 이유는
+>
+> 어떤 한 객체나 리스트를 수정했을 때, 엉뚱한 곳에서 변경이 되는 것을 막기 위해서다.
+>
+> 그럼 애초에 수정을 못하도록 (상태를 변화시킬 수 없도록) VO로 만든다. (상태를 변화시키는 메서드를 제거한다.)
+>
+> 그리고 리스트는 unmodifiableList등의 메서드를 활용하여 보호한다.
 
 
 
@@ -184,5 +233,7 @@ public class Main {
 - https://heavenly-appear.tistory.com/298
 
 - https://library1008.tistory.com/47
+
+- https://os94.tistory.com/154
 
   
