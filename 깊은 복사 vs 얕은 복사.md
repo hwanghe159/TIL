@@ -96,7 +96,7 @@ public class Main {
                 new Person("a", 1), new Person("b", 2), new Person("c", 3)));
 
         List<Person> people2 = people1; //얕은 복사
-		people1.clear();                //people2의 모든 원소도 삭제된다.
+        people1.clear();                //people2의 모든 원소도 삭제된다.
     }
 }
 
@@ -114,7 +114,7 @@ public class Main {
 
         List<Person> people2 = new ArrayList<>();//addAll사용전 초기화
         people2.addAll(people1);                 //깊은 복사
-		//List<Person> people2 = new ArrayList<>(people1); 위의 두 줄을 이와 같이 쓸 수도 있다.
+        //List<Person> people2 = new ArrayList<>(people1); 위의 두 줄을 이와 같이 쓸 수도 있다.
         
         people1.clear();                         //people1의 모든 원소만 삭제될뿐,
                                                  //people2엔 영향 없다
@@ -205,7 +205,7 @@ public class Main {
                 new Person("a", 1), new Person("b", 2), new Person("c", 3)));
 
         //깊은복사이다. people2는 이제 add()등의 메서드 사용 불가
-		List<Person> people2 = Collections.unmodifiableList(new ArrayList<>(people1)); 
+        List<Person> people2 = Collections.unmodifiableList(new ArrayList<>(people1)); 
         
         people1.clear(); //people1의 모든 원소만 삭제될뿐,
                          //people2엔 영향 없다
