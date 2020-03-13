@@ -1,4 +1,8 @@
-# :book: TIL(Today I Learned)
+# :book::pencil2: TIL(Today I Learned)
+
+
+
+
 
 하루하루 듣고 배웠던 것들을 기록하자!
 
