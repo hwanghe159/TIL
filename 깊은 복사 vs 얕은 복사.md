@@ -39,7 +39,7 @@ public static void main(String[] args) {
 
 위와 같은 현상은 데이터를 복사하는 게 아니라 주소값을 복사하는 `얕은 복사`이기 때문에 일어난다.
 
-
+</br>
 
 그렇다면 데이터를 복사하여 서로 영향을 끼치지 않게 하려면?
 
@@ -81,7 +81,7 @@ public static void main(String[] args) {
 
 
 
- 
+ </br>
 
 ### ArrayList 복사
 
@@ -102,7 +102,7 @@ public class Main {
 
 ```
 
-
+</br>
 
 `깊은 복사`를 하려면?
 
@@ -122,7 +122,7 @@ public class Main {
 }
 ```
 
-
+</br>
 
 그렇다면 `people2.addAll(people1);` 을 통해 깊은 복사를 했는데,
 
@@ -130,7 +130,7 @@ public class Main {
 
 그러니까 `people1` 내부의 `Person("a",1)` 을 수정하면 `people2` 내부의 `Person("a",1)`도 수정될까?
 
-
+</br>
 
 수정이 된다. 그리고 수정을 막으려면 다음과 같이 하면 된다.
 
@@ -174,7 +174,7 @@ public class Main {
 }
 ```
 
-
+</br>
 
 하지만 위와 같이 원소 하나하나 복사하고 앉아있기엔 너무 복잡하다.
 
@@ -214,9 +214,7 @@ public class Main {
 
 ```
 
-
-
-
+</br>
 
 > 우리가 이렇게 얕은 복사, 깊은 복사를 따지는 이유는
 >
@@ -226,7 +224,7 @@ public class Main {
 >
 > 그리고 리스트는 unmodifiableList등의 메서드를 활용하여 보호한다.
 
-
+</br>
 
 ### 참고
 
