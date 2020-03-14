@@ -37,7 +37,7 @@ Stream<String> strStrm = strArrStrm.flatMap(Arrays::stream);
 
 </br>
 
-즉, `map()`은 각각의 요소 (`String[]`) 에 대해서 `map()`의 파라미터로 제공된 함수(`Arrays::stream`)를 수행하여 변환된다. 
+즉, `map()`은 각각의 요소 (`String[]`) 에 대해서 `map()`의 파라미터로 제공된 함수(`Arrays::stream`)를 수행하여 변환한다. 
 
 그래서 위의 예에선 각각의 `String[]`이 `Arrays::stream`에 의해 `Stream<String>` 형으로 바뀌었으므로 최종 형은 `Stream<Stream<String>>` 인 것이다.
 
@@ -74,7 +74,7 @@ Stream<String> strStrm = strArrStrm.flatMap(Arrays::stream);
 
    </br>
 
-3. 두개의 배열의 모든 조합으로 여려 객체를 생성할때
+3. 두개의 배열의 모든 조합으로 여러 객체를 생성할때
 
    ```java
    class Card {
@@ -91,7 +91,7 @@ Stream<String> strStrm = strArrStrm.flatMap(Arrays::stream);
    Stream<String> shapeStrm = Arrays.stream({"다이아몬드","클로버","하트","스페이드"});
    Stream<String> typeStrm = Arrays.stream({"A","2","3","4","5","6","7","8","9","10","J","Q","K"});
    
-   List<Card> cards = Arrays.stream(shapes)
+   List<Card> cards = shapeStrm
                         .flatMap(shape -> typeStrm.map(type -> new Card(shape, type)))
                         .collect(Collectors.toList());
    ```
