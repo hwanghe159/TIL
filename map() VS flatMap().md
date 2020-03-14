@@ -88,11 +88,11 @@ Stream<String> strStrm = strArrStrm.flatMap(Arrays::stream);
    }
    
    
-   Stream<String> shapeStrm = Arrays.stream({"다이아몬드","클로버","하트","스페이드"});
-   Stream<String> typeStrm = Arrays.stream({"A","2","3","4","5","6","7","8","9","10","J","Q","K"});
-   
-   List<Card> cards = shapeStrm
-                        .flatMap(shape -> typeStrm.map(type -> new Card(shape, type)))
+   String[] shapes = {"다이아몬드", "클로버", "하트", "스페이드"};
+   String[] types = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+   List<Card> cards = Arrays.stream(shapes)
+                        .flatMap(shape -> Arrays.stream(types)
+                                 .map(type -> new Card(shape, type)))
                         .collect(Collectors.toList());
    ```
 
