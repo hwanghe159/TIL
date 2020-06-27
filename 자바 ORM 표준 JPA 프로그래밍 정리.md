@@ -187,6 +187,133 @@ ORM 프레임워크 : 객체와 테이블을 매핑해서 패러다임의 불일
 
 ## 4장 : 엔티티 매핑
 
+매핑 어노테이션을 크게 4가지로 분류할 수 있다.
+
+- 객체와 테이블 매핑 : `@Entity`, `@Table`
+- 기본 키 매핑 : `@Id`
+- 필드와 컬럼 매핑 : `@Column`
+- 연관관계 매핑 : `@ManyToOne`, `@JoinColumn`
+
+### @Entity
+
+테이블과 매핑할 클래스에 필수로 붙여야 한다. 
+
+- 기본 생성자는 필수다.(파라미터 없는 public이나 protected 생성자)
+- final클래스, enum, interface, inner클래스에는 사용할 수 없다.
+- 저장할 필드에 final을 사용하면 안된다.
+
+### @Table
+
+엔티티와 매핑할 테이블을 지정한다. 생략하면 매핑한 엔티티 이름을 테이블 이름으로 사용한다.
+
+### 데이터베이스 스키마 자동생성
+
+JPA는 매핑 정보를 보고 DB스키마를 자동으로 생성해준다.
+
+`persistence.xml`에 다음 속성을 추가하면 된다.
+
+`<property name="hibernate.hbm2ddl.auto" value="create" />`
+
+ hibernate.hbm2ddl.auto의 속성은 다음과 같다.
+
+| 옵션             | 설명                                                         |
+| ---------------- | ------------------------------------------------------------ |
+| create           | 기존 테이블을 삭제하고 새로 생성. DROP+CREATE                |
+| create-drop      | DROP+CREATE+DROP                                             |
+| update           | DB 테이블과 엔티티 매핑 정보를 비교해서 변경 사항만 수정한다. |
+| validate         | DB 테이블과 엔티티 매핑 정보를 비교해서 차이가 있으면 경고를 남기고 실행하지 않음. |
+| 속성 자체를 삭제 | 자동생성 기능 사용안함                                       |
+
+운영 서버에서 절대 사용하면 안됨. 개발서버나 개발단계에서 사용 : create, create-drop, update
+
+개발 초기 단계 : create, update
+
+초기화 상태로 자동화된 테스트 진행 :  create, create-drop
+
+테스트 서버 : update, validate
+
+스테이징과 운영서버 : validate, 또는 사용안함
+
+### @Id
+
+기본 키를 직접 할당하려면 `@Id`만 붙이면 되고,
+
+자동 생성 하려면 `@GeneratedValue`도 함께 붙여준다.
+
+- IDENTITY 전략
+
+  - `@GeneratedValue(strategy = GenerationType.IDENTITY)`만 붙이면 됨
+
+  - 기본 키 생성을 DB에 위임한다.
+
+  - 트랜잭션을 지원하는 쓰기 지연이 동작하지 않는다.
+
+- SEQUENCE 전략
+
+  - 데이터베이스 시퀀스(유일한 값을 순서대로 생성하는 특별한 DB 오브젝트)를 사용해서 기본키를 할당한다.
+
+  - ```java
+    @Entity
+    @SequenceGenerator(
+    	name = "BOARD_SEQ_GENERATOR",
+    	sequenceName = "BOARD_SEQ",
+    	initialValue = 1, allocationSize = 1)
+    public class Board {
+        @Id
+    	@GeneratedValue(strategy = GenerationType.SEQUENCE,
+                       generator = "BOARD_SEQ_GENERATOR")
+        private Long id;
+        ...
+    }
+    ```
+
+  - IDENTITY 전략은 `엔티티를 DB에 저장 -> 식별자 조회 -> 엔티티의 식별자에 할당` 이었다면,
+
+    SEQUENCE 전략은 `DB시퀀스를 사용해서 식별자 조회 -> 엔티티에 할당 -> 영속성 컨텍스트에 저장`이다.
+
+- TABLE 전략
+
+  - 키 생성 전용 테이블을 하나 만들고 이름과 값으로 사용할 컬럼을 만들어서 시퀀스를 흉내내는 전략이다.
+
+  - ```java
+    @Entity
+    @TableGenerator(
+    	name = "BOARD_SEQ_GENERATOR",
+    	table = "MY_SEQUENCES",
+        pkColumnValue = "BOARD_SEQ", allocationSize = 1)
+    public class Board {
+        @Id
+    	@GeneratedValue(strategy = GenerationType.TABLE,
+                       generator = "BOARD_SEQ_GENERATOR")
+        private Long id;
+        ...
+    }
+    ```
+
+- AUTO 전략
+
+  - `@GeneratedValue.strategy`의 기본값이다.
+  - 선택한 DB방언에 따라 전략을 자동으로 선택한다.
+  - `@GeneratedValue(strategy = GenerationType.IDENTITY)`라고 붙이거나 아니면 `@GeneratedValue`만 붙여도 된다.
+
+### 필드와 컬럼 매핑
+
+- `@Column` : 컬럼 매핑
+
+  생략해도 매핑은 되지만 기본타입일땐 not null 제약조건이 붙고, 객체 타입일땐 not null이 안붙는다.
+
+- `@Enumerated` : enum타입 매핑
+
+  웬만하면 `@Enumerated(EnumType.STRING)`으로 사용한다.  
+
+- `@Temporal` : 날짜 타입 매핑
+
+- `@Lob` : 데이터베이스의 BLOB, CLOB 타입과 매핑
+
+- `@Transient` : 매핑하고 싶지 않은 필드에 붙임
+
+- `@Access` : 엔티티 데이터에 접근하는 방식 지정
+
 <br>
 
 ## 5장 : 연관관계 매핑 기초
