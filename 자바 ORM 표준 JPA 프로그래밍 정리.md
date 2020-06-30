@@ -465,7 +465,7 @@ public class Team {
 
    일대다 관계를 매핑한다. 
 
-   `mappedBy = "team"`는 연관관계의 주인을 Member.team으로 정한다는 뜻이다.
+   `mappedBy = "team"`는 연관관계의 주인을 `Member.team`으로 정한다는 뜻이다.
 
 ### 연관관계의 주인
 
@@ -510,4 +510,268 @@ em.persist(member1);
 <br>
 
 ## 6장 : 다양한 연관관계 매핑
+
+모두 왼쪽을 연관관계의 주인으로 설정했다. 예를 들어 다대일 양방향이면 다쪽이 연관관계의 주인이다.
+
+### 다대일
+
+회원(N)과 팀(1)을 이용해 다대일 관계를 매핑한다. (회원을 연관관계의 주인이라고 가정)
+
+회원과 팀의 테이블은 단방향이던, 양방향이던 둘이 똑같다. (외래키는 항상 다쪽에 존재한다.)
+
+1. 다대일 단방향
+
+   - 회원과 팀은 다대일 관계.
+
+   - `Member.team`는 존재하지만 `Team.members`는 존재하지 않으므로, `Member -> Team`은 가능하지만 `Team -> Member` 불가능 (단방향)
+
+   - `Member.team`에 다대일 표시 (`@ManyToOne`)
+
+   - `Member.team`가 연관관계의 주인이니까 외래키(`TEAM_ID`)를 관리하기 위해 외래키와 매핑
+
+     (`@JoinColumn(name = "TEAM_ID")`)
+
+   - `@JoinColumn`은 생략할 수 있지만, 생략할 경우 외래키 이름으로 `team_TEAM_ID`를 사용한다.
+
+2. 다대일 양방향
+
+   - 회원과 팀은 다대일 관계.
+
+   - `Member.team`와 `Team.members`둘 다 존재하므로, `Member -> Team`와 `Team -> Member` 둘 다 가능 (양방향)
+
+   - `Member.team`에 다대일 표시 (`@ManyToOne`)
+
+   - `Team.members`에 일대다 표시 (`@OneToMany`)
+
+   - `Team.members`은 연관관계의 주인이 아니므로 `Member.team`의 거울일 뿐이라는 것을 표시.
+
+     (`@OneToMany(mappedBy = "team")`)
+
+   - `Member.team`가 연관관계의 주인이니까 외래키(`TEAM_ID`)를 관리하기 위해 외래키와 매핑
+
+     (`@JoinColumn(name = "TEAM_ID")`)
+
+   - 단방향일때와 마찬가지로 `@JoinColumn`를 생략해도 될까?
+
+### 일대다
+
+팀(1)과 회원(N)을 이용해 일대다 관계를 매핑한다.
+
+팀을 연관관계의 주인이라고 가정한다. (하지만 일(1)쪽을 연관관계의 주인으로 설정하는건 비추천)
+
+팀과 회원의 테이블은 단방향이던, 양방향이던 둘이 똑같다. (외래키는 항상 다쪽에 존재한다.)
+
+1. 일대다 단방향
+
+   - 팀과 회원은 일대다 관계.
+
+   - `Team.members`는 존재하지만 `Member.team`는 존재하지 않으므로, `Team -> Member`은 가능하지만 `Member -> Team` 불가능 (단방향)
+
+   - `Team.members`에 일대다 표시 (`@OneToMany`)
+
+   - `Team.members`가 연관관계의 주인이니까 외래키(`TEAM_ID`)를 관리하기 위해 외래키와 매핑
+
+     (`@JoinColumn(name = "TEAM_ID")`)
+
+   - 하지만 외래키는 회원테이블쪽에, 연관관계의 주인은 팀 엔티티쪽에 있다.
+
+     - 매핑한 객체가 관리하는 외래키가 다른 테이블에 있다는 것이 단점이다.
+     - 본인 테이블에 외래키가 있으면 저장과 연관관계 처리를 INSERT로 한번에 처리할 수 있지만 이 상황에선 UPDATE를 추가로 실행해야 한다.
+     - 그래서 일대다 단방향보단 다대일 양방향을 사용하자.
+
+   - 일대다 단방향일땐 `@JoinColumn(name = "TEAM_ID")`을 생략하면 안된다.
+
+     - 생략하면 연결 테이블을 중간에 두고 연관관계를 관리한다. (조인 테이블 전략이 기본이다.)
+
+2. 일대다 양방향
+
+   - 일대다 양방향일때, 일(1)쪽은 연관관계의 주인이 될 수 없다.
+     - 양방향인 경우 `@ManyToOne`와 `@OneToMany` 둘 중 연관관계의 주인은 항상 `@ManyToOne`을 사용한 쪽(다 쪽)이기 때문이다.
+   - 아예 불가능하진 않지만, 사용하지 말자. (다대일 양방향을 사용하자.)
+
+### 일대일
+
+일대다 관계에선 다 쪽에서 외래키를 가졌지만, 일대일 관계에선 둘 중 하나를 선택해야 한다.
+
+회원(주 테이블)과 사물함(대상 테이블)을 이용해 일대일 관계를 매핑한다.
+
+#### 주 테이블에 외래키
+
+객체지향 개발자들이 선호한다.
+
+1. 단방향
+
+   - `Member.locker`에 연관관계, 외래키 매핑
+
+     ```java
+     @OneToOne
+     @JoinColumn(name = "LOCKER_ID")
+     private Locker locker;
+     ```
+
+2. 양방향
+
+   - `Member.locker`에 연관관계, 외래키 매핑
+
+     ```java
+     @OneToOne
+     @JoinColumn(name = "LOCKER_ID")
+     private Locker locker;
+     ```
+
+   - `Locker.member`에 연관관계 매핑
+
+     ```java
+     @OneToOne(mappedBy = "locker")
+     private Member member;
+     ```
+
+#### 대상 테이블에 외래키
+
+1. 단방향
+
+   `Member -> Locker` 방향인 경우는 지원하지 않는다.
+
+   `Locker -> Member`방향으로 수정하거나 양방향으로 만들고 `Locker`을 연관관계의 주인으로 설정해야 한다. 
+
+2. 양방향
+
+   - `Member.locker`에 연관관계 매핑
+
+     ```java
+     @OneToOne(mappedBy = "member")
+     private Locker locker;
+     ```
+
+   - `Locker.member`에 연관관계, 외래키 매핑
+
+     ```java
+     @OneToOne
+     @JoinColumn(name = "MEMBER_ID")
+     private Member member;
+     ```
+
+### 다대다
+
+- 다대다 관계에선 두개의 테이블로 관계를 표현하지 못한다. 중간에 연결 테이블이 필요하다.
+- 하지만 객체는 객체 2개로 다대다 관계를 만들 수 있다. `@ManyToMany`를 사용한다.
+- 회원과 상품으로 다대다를 설명한다.
+
+#### 다대다 단방향
+
+- 회원과 상품은 다대다 관계
+
+- `Member.products`는 존재하지만 `Product.members`는 존재하지 않음 (단방향)
+
+- `Member.products`에 다대다 표시(`@ManyToMany`), 조인테이블 매핑(`@JoinTable`)
+
+  ```java
+  @ManyToMany
+  @JoinTable(name = "MEMBER_PRODUCT", //1.
+            joinColumns = @JoinColumn(name = "MEMBER_ID"), //2.
+            inverseJoinColumns = @JoinColumn(name = "PRODUCT_ID")) //3.
+  private List<Product> products = new ArrayList<Product>();
+  ```
+
+  1. name 속성으로 연결테이블의 이름을 설정한다.
+  2. joinColumns 속성으로 현재 방향(회원)과 매핑할 조인 컬럼 정보를 지정한다.
+  3. inverseJoinColumns 속성으로 반대 방향(상품)과 매핑할 조인 컬럼 정보를 지정한다.
+
+- 저장할땐 상품테이블, 회원테이블, 연결테이블 모두 INSERT문이 실행된다.
+
+- `member.getProducts()`을 실행하면 연결테이블과 상품테이블을 INNER JOIN해서 조회한다.
+
+#### 다대다 양방향
+
+- 회원과 상품 중 연관관계의 주인을 정한다. (여기선 회원이 주인)
+
+- 정했으면, 연관관계의 주인이 아닌 곳에 `mappedBy` 속성을 사용한다.
+
+- `Member.products`에 다대다 표시(`@ManyToMany`), 조인테이블 매핑(`@JoinTable`)
+
+  ```java
+  @ManyToMany
+  @JoinTable(name = "MEMBER_PRODUCT",
+            joinColumns = @JoinColumn(name = "MEMBER_ID"),
+            inverseJoinColumns = @JoinColumn(name = "PRODUCT_ID"))
+  private List<Product> products = new ArrayList<Product>();
+  ```
+
+  `Product.members`에 다대다 표시, 연관관계의 주인이 아니라고 표시
+
+  ```java
+  @ManyToMany(mappedBy = "products")
+  private List<Member> members;
+  ```
+
+- 연관관계 편의 메서드를 사용해서 편하게 양방향 연관관계를 편하게 설정한다.
+
+#### 연결 엔티티 사용
+
+하지만 `@ManyToMany`를 사용하면 연결 테이블안에 추가 컬럼을 넣을 수 없다.
+
+연결 테이블에 컬럼을 추가하고 싶으면 연결 테이블을 매핑하는 연결 엔티티를 만들어야 한다.
+
+```java
+@Entity
+@IdClass(MemberProductId.class) //1.
+public class MemberProduct {
+    
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "MEMBER_ID") //2.
+    private Member member;
+    
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "PRODUCT_ID") //2.
+    private Product product;
+    
+    //컬럼 추가 ..
+    
+}
+```
+
+1. `@IdClass`로 복합 기본키를 매핑
+2. 기본키를 매핑하는 `@Id`와 외래키를 매핑하는 `@JoinColumn`을 동시에 사용해서 기본키와 외래키를 한번에 매핑한다.
+
+복합 기본키를 위한 식별자 클래스의 특징
+
+- 복합키는 별도의 식별자 클래스로 만들어야 한다.
+- `public` 클래스여야 한다.
+- `Serializable`을 구현해야 한다.
+- 기본 생성자가 있어야 한다.
+- `equals()`와 `hashCode()`를 구현해야 한다.
+- `@IdClass`외에 `@EmbeddedId`를 사용하는 방법도 있다. -> 7.3절
+
+회원상품을 저장하려면 회원과 상품을 저장한 후, 둘을 이용하여 회원상품을 저장해야 한다.
+
+조회하려면 `MemberProduct memberProduct = em.find(MemberProduct.class, memberProductId);`와 같이 식별자 클래스의 객체로 조회해야 한다.
+
+#### 복합키 사용하지 않기
+
+복합키를 사용하지 않고 데이터베이스에서 자동으로 생성해주는 대리 키를 기본키로 사용하는걸 추천한다.
+
+`MEMBER_ID`와 `PRODUCT_ID`를 복합키가 아닌 외래키로 사용하는 것이다.
+
+```java
+@Entity
+public class Order { // MemberProduct -> Order
+    
+    @Id @GeneratedValue
+    @Column(name = "ORDER_ID")
+    private Long id;
+    
+    @ManyToOne
+    @JoinColumn(name = "MEMBER_ID")
+    private Member member;
+    
+    @ManyToOne
+    @JoinColumn(name = "PRODUCT_ID")
+    private Product product;
+    
+    //컬럼 추가 ..
+    
+}
+```
 
