@@ -20,7 +20,51 @@
 
    `npm run serve`
 
+## eslint, prettier 설정
 
+1. eslint 설정
+
+   `cd <project-folder>`
+
+   `npm init -y` 
+
+   `npm install eslint`
+
+2. 사용자 환경변수 설정
+
+   eslint 위치 ( C:\Users\junho\todolist-vue-practice\node_modules\.bin ) Path에 추가
+
+3. 초기화
+
+   `eslint --init`
+
+4. 설정 진행 후 설치
+
+5. 루트 경로에 `.eslintrc.js` 생성 확인
+
+6. 인텔리제이 eslint 설정
+
+   Preferences... > Languages & Frameworks > Javascript > Code Quality Tools > ESLint에서
+
+   Manual ESLint configuration 체크 후 설정
+
+7. Prettier 설치
+
+   `npm i -D prettier`
+
+   `npm i -D eslint-config-prettier eslint-plugin-prettier`
+
+8. Prettier 설정
+
+   .eslintrc.js의 extends 마지막에 아래 추가
+
+   ```
+   {
+     "extends": ["plugin:prettier/recommended"]
+   }
+   ```
+
+   
 
 ## 디렉티브
 
