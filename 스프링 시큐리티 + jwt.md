@@ -1,3 +1,159 @@
+## 스프링 시큐리티의 구조
+
+### 보안관련 3요소
+
+- 접근 주체(Principal)
+  - 보호된 대상에 접근하는 사용자
+- 인증(Authenticate)
+  - 현재 사용자가 누군지 확인하는 과정
+  - 일반적으로 아이디/암호를 이용해서 인증을 처리
+- 인가(Authorize)
+  - 현재 사용자가 특정 대상을 사용할 권한이 있는지 검사
+
+### 스프링 시큐리티와 보안 3요소의 매칭
+
+- 접근 주체 -> `Authentication`
+- 인증 -> `AuthenticationManager`
+- 인가 -> `SecurityInterceptor`
+
+### Authentication과 SecurityContext
+
+- `Authentication`의 용도
+  - 현재 접근 주체 정보를 담는 목적
+  - 인증 요청할 때, 요청 정보를 담는 목적
+- `SecurityContext`
+  - `Authentication`을 보관
+  - 스프링 시큐리티는 현재 사용자에 대한 `Authentication` 객체를 구할 때 `SecurityContext`로부터 구함
+
+### SecurityContextHolder
+
+- `SecurityContextHolder`에서 `SecurityContext`을 보관
+
+  - 기본 : 쓰레드로컬에서 `SecurityContext`을 보관
+
+- 전형적인 `SecurityContext` 설정 코드
+
+  - ```java
+    Authentication auth = someMethodForGettingAuth(req, res);
+    try {
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        chain.doFilter(req, res);//이후 코드에서 동일 SecurityContext 사용
+    } finally {
+        SecurityContextHolder.clearContext();
+    }
+    ```
+
+  - 스프링 시큐리티가 유사한 필터를 이미 제공함
+
+### Authentication의 주요 메서드
+
+- `String getName()` : 사용자의 이름
+- `Object getCredential()` : 증명 값 (비밀번호 등)
+- `Object getPrincipal()` : 인증 주체 정보
+- `boolean isAuthenticated()` : 인증되었는지 여부
+- `Collection<GrantedAuthority> getAuthorities()` : 현재 사용자가 가진 권한(`GrantedAuthority`)
+
+### AuthenticationManager : 인증을 처리함
+
+```java
+public interface AuthenticationManager {
+    Authentication authenticate(Authentication auth) throws AuthenticationException;
+}
+```
+
+- 오직 하나의 메서드(`authenticate()`)를 가지고 있다.
+- 인증에 성공하면 인증 정보를 담고 있는 `Authentication`객체 리턴
+  - 스프링 시큐리티는 리턴한 `Authentication`객체를 `SecurityContext`에 보관 및 인증 상태를 유지하기 위해 세션에 보관
+  - 인증 실패시 `AuthenticationException`을 발생시킴
+  - 결정할 수 없을 땐 null 반환
+
+### ProviderManager
+
+- `AuthenticationManager` 의 가장 일반적으로 사용되는 구현이다.
+- 일련의 `AuthenticationProvider` 인스턴스들에 위임한다.
+- `ProviderManager` 가 특정 `Authentication` 인스턴스 타입을 인식하지 못하면 `ProviderManager` 는 건너뛴다.
+
+### AuthenticationProvider
+
+```java
+public interface AuthenticationProvider {
+	Authentication authenticate(Authentication authentication)
+			throws AuthenticationException;
+
+	boolean supports(Class<?> authentication);
+}
+```
+
+- `AuthenticationManager`과 비슷하다. 하지만
+- 호출자가 주어진 `Authentication` 타입을 지원 하는지를 질의 할 수 있는 `supports()`가 있다
+
+
+
+### ProviderManager를 사용하는 AuthenticationManager 계층구조
+
+![authentication](C:\Users\junho\TIL\images\authentication.png)
+
+- ```java
+  public class ProviderManager implements AuthenticationManager, MessageSourceAware, InitializingBean {
+  	private List<AuthenticationProvider> providers = Collections.emptyList();
+  	private AuthenticationManager parent;
+  	
+      // ... 다른 필드, 메서드들 생략
+  
+  }
+  ```
+
+  `AuthenticationProvider`를 리스트로 갖고 있고, 다른 `AuthenticationManager`를 부모로 갖고 있다.
+
+- 때때로 애플리케이션이 보호된 리소스(예. `/api/**` 패턴과 일치하는 모든 웹 리소스)의 논리적인 그룹들이 있고, 각각의 그룹들은 고유한 `AuthenticationManager` 를 가지고 있을 수 있다. 각각의 그룹은 `ProviderManager` 이며, 부모와 공유한다. 그런 다음 부모는 일종의 "글로벌" 리소스로서, 모든 프로바이더에 대한 대체 역할을 한다.
+
+### (Abstract)SecurityInterceptor : 인가를 처리함
+
+- 웹의 경우 `FilterSecurityInterceptor` 구현 사용
+
+- `AccessDecisionManager`에 권한 검사 위임
+
+- ```java
+  public class AccessDecisionManager {
+      void decide(Authentication authentication,
+                 Object object
+                 Collection<ConfigAttribute> configAttributes) 
+          throws AccessDeniedException, InsufficientAuthenticationException;
+      boolean supports(ConfigAttribute attribute);
+      boolean supports(Class<?> clazz);
+  }
+  ```
+
+- 사용자가 자원의 보안 설정 기준으로, 접근 권한이 없을 경우 익셉션 발생
+
+
+
+### SecurityFilterChain
+
+- Security와 관련된 서블릿 필터는 연결된 여러 필터들로 구성돼 있음 -> 그래서 Chain이라는 표현을 씀
+- ![주석 2020-08-07 213147](C:\Users\junho\TIL\images\주석 2020-08-07 213147.png)
+
+이미지 출처 : https://atin.tistory.com/590
+
+- `SecurityContextPersistenceFilter` - 요청(request)전에, `SecurityContextRepository`에서 받아온 정보를 `SecurityContextHolder`에 주입합니다.
+- `LogoutFilter` - 주체(`Principal`)의 로그아웃을 진행합니다. 주체는 보통 유저를 말합니다.
+- `UsernamePasswordAuthenticationFilter` - (로그인) 인증 과정을 진행합니다.
+- `DefaultLoginPageGeneratingFilter` - 사용자가 별도의 로그인 페이지를 구현하지 않은 경우, 스프링에서 기본적으로 설정한 로그인 페이지를 처리합니다.
+- `BasicAuthenticationFilter` - HTTP 요청의 (BASIC)인증 헤더를 처리하여 결과를 `SecurityContextHolder`에 저장합니다.
+- `RememberMeAuthenticationFilter` - `SecurityContext`에 인증(`Authentication`) 객체가 있는지 확인하고 `RememberMeServices`를 구현한 객체의 요청이 있을 경우, Remember-Me(ex 사용자가 바로 로그인을 하기 위해서 저장 한 아이디와 패스워드)를 인증 토큰으로 컨텍스트에 주입합니다.
+- `AnonymousAuthenticationFilter` - `SecurityContextHolder`에 인증(`Authentication`) 객체가 있는지 확인하고, 필요한 경우 `Authentication` 객체를 주입합니다.
+- `SessionManagementFilter` - 요청이 시작된 이 후 인증된 사용자 인지 확인하고, 인증된 사용자일 경우`SessionAuthenticationStrategy`를 호출하여 세션 고정 보호 메커니즘을 활성화하거나 여러 동시 로그인을 확인하는 것과 같은 세션 관련 활동을 수행합니다.
+- `ExceptionTranslationFilter` - 필터 체인 내에서 발생(Throw)되는 모든 예외(`AccessDeniedException`, `AuthenticationException`)를 처리합니다.
+- `FilterSecurityInterceptor` - HTTP 리소스의 보안 처리를 수행합니다.
+
+
+
+
+
+![99A7223C5B6B29F003](C:\Users\junho\TIL\images\99A7223C5B6B29F003.png)
+
+
+
 ## Spring Security - Auth0 JWT Library
 
 ![주석 2020-08-04 160156](C:\Users\junho\TIL\images\주석 2020-08-04 160156.png)
@@ -104,3 +260,16 @@ JWT에 대한 [좋은 글](https://blog.outsider.ne.kr/1160) (댓글을 꼭 읽�
 - FormLoginAuthenticationSuccessHandler
   - PostAuthorizationToken이 Provider에서 넘어오면 (Provider의 authenticate()의 리턴값이 PostAuthorizationToken임.) 넘어온 토큰을 가지고 successfulAuthentication
 
+
+
+
+
+
+
+## 참고
+
+- https://www.slideshare.net/madvirus/ss-36809454 (최범균님의 스프링 시큐리티 구조 이해 슬라이드)
+- https://atin.tistory.com/590
+- https://siyoon210.tistory.com/32
+- https://www.youtube.com/channel/UCQqSNFQ3TI7x0l06UUGldxQ/videos (유튜브 봄이네집 채널)
+- https://github.com/heowc/top-spring-security-architecture-translation-kr (스프링 시큐리티 아키텍쳐 공식문서 번역)
