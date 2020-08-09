@@ -148,9 +148,25 @@ public interface AuthenticationProvider {
 
 
 
-
+### Username and Password 인증 방식의 아키텍처
 
 ![99A7223C5B6B29F003](C:\Users\junho\TIL\images\99A7223C5B6B29F003.png)
+
+위 그림의 `AuthenticationFilter`의 역할은 `UsernamePasswordAuthenticationFilter`가 수행하고 **전체적인 프로세스**는 다음과 같다.
+
+1. Client가 어플리케이션에 요청을 보내면, Servlet Filter에 의해서 Security Filter로 Security 작업이 위임되고 여러 Security Filter 중에서 `UsernamePasswordAuthenticationFilter`**(Username and Password Authentication 방식에서 사용하는 AuthenticationFilter)**에서 **인증**을 처리한다.
+2. `AuthenticationFilter`**(UsernamePasswordAuthenticationFilter인데 지금부터 AuthenticationFilter라고 부름)**는 Servlet 요청 객체(HttpServletRequest)에서 username과 password를 추출해 `UsernameAuthenticationToken`**(이하 인증 객체)**을 생성한다.
+   - `UsernameAuthenticationToken`는 `Authentication`을 상속받고 있다.
+3. `AuthenticationFilter`는 `AuthenticationManager`에게 인증 객체를 전달한다.
+   - `ProviderManager`가 `AuthenticationManager`인터페이스를 구현하고 있다. 즉, 실질적으론 `ProviderManager`가 인증 객체를 전달받는다.
+4. `ProviderManager`는 인증을 위해 `AuthenticationProvider`에게 인증 객체를 전달한다.
+   - 여러 Provider중에 적합한 Provider을 선정하여 그 Provider의 `authenticate()`메서드에 인증 객체를 전달한다.
+5. `AuthenticationProvider`는 전달받은 인증 객체의 정보(일반적으로 사용자 아이디)를 `UserDetailsService`에 넘겨준다.
+6. `UserDetailsService`는 전달 받은 사용자 정보를 통해 DB에서 알맞는 사용자를 찾고 이를 기반으로 `UserDetails`객체를 만든다.
+7. 사용자 정보와 일치하는 `UserDetails`객체를 `AuthenticationProvider`에 전달한다.
+8. `AuthenticationProvider`은 전달받은 `UserDetails`를 인증해 성공하면 `ProviderManager`에게 권한(Authorities)을 담은 검증된 인증 객체를 전달한다.
+9. `ProviderManager`는 검증된 인증 객체를 `AuthenticationFilter`에게 전달한다. **(event 기반 으로 전달)**
+10. `AuthenticationFilter`는 검증된 인증 객체를 `SecurityContextHolder`의 `SecurityContext`에 저장한다.
 
 
 
@@ -251,14 +267,13 @@ public interface AuthenticationProvider {
 - FormLoginFilter : 최초 로그인을 시도할때 로그인 요청을 걸러내는 필터
 - JWT Factory : JWT를 만듦 + 검증
 - JWT Authentication Provider : API에 접근하는 요청에 묻어있는 HTTP Authorization헤더의 값을 가져와서 권한을 갖고 있는지 확인
-- JWT Authentication Filter : 해당 요청에 대한 필터링, Provider연결하여 사용자가 인증된 사용자인지 확인
-
-JWT에 대한 [좋은 글](https://blog.outsider.ne.kr/1160) (댓글을 꼭 읽어보자)
+- JWT Authentication Filter : 한번 인증이 발생한 후에 HTTP헤더에 인증값이 묻어있는 경우에 인증값을 이용해 인증을 진행하는 필터. 해당 요청에 대한 필터링, Provider연결하여 사용자가 인증된 사용자인지 확인
+- JWT에 대한 [좋은 글](https://blog.outsider.ne.kr/1160) (댓글을 꼭 읽어보자)
 
 
 
 - FormLoginAuthenticationSuccessHandler
-  - PostAuthorizationToken이 Provider에서 넘어오면 (Provider의 authenticate()의 리턴값이 PostAuthorizationToken임.) 넘어온 토큰을 가지고 successfulAuthentication
+  - PostAuthorizationToken이 Provider에서 넘어오면 (Provider의 authenticate()의 리턴값이 PostAuthorizationToken임.) 넘어온 토큰을 가지고 successfulAuthentication()을 호출한다.
 
 
 
@@ -273,3 +288,4 @@ JWT에 대한 [좋은 글](https://blog.outsider.ne.kr/1160) (댓글을 꼭 읽�
 - https://siyoon210.tistory.com/32
 - https://www.youtube.com/channel/UCQqSNFQ3TI7x0l06UUGldxQ/videos (유튜브 봄이네집 채널)
 - https://github.com/heowc/top-spring-security-architecture-translation-kr (스프링 시큐리티 아키텍쳐 공식문서 번역)
+- https://imbf.github.io/spring/2020/06/29/Spring-Security-with-JWT.html
