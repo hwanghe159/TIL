@@ -91,7 +91,7 @@ public interface AuthenticationProvider {
 
 ### ProviderManager를 사용하는 AuthenticationManager 계층구조
 
-![authentication](C:\Users\junho\TIL\images\authentication.png)
+![authentication](images\authentication.png)
 
 - ```java
   public class ProviderManager implements AuthenticationManager, MessageSourceAware, InitializingBean {
@@ -131,7 +131,7 @@ public interface AuthenticationProvider {
 ### SecurityFilterChain
 
 - Security와 관련된 서블릿 필터는 연결된 여러 필터들로 구성돼 있음 -> 그래서 Chain이라는 표현을 씀
-- ![주석 2020-08-07 213147](C:\Users\junho\TIL\images\주석 2020-08-07 213147.png)
+- ![주석 2020-08-07 213147](images\주석 2020-08-07 213147.png)
 
 이미지 출처 : https://atin.tistory.com/590
 
@@ -150,7 +150,7 @@ public interface AuthenticationProvider {
 
 ### Username and Password 인증 방식의 아키텍처
 
-![99A7223C5B6B29F003](C:\Users\junho\TIL\images\99A7223C5B6B29F003.png)
+![99A7223C5B6B29F003](images\99A7223C5B6B29F003.png)
 
 위 그림의 `AuthenticationFilter`의 역할은 `UsernamePasswordAuthenticationFilter`가 수행하고 **전체적인 프로세스**는 다음과 같다.
 
@@ -172,7 +172,7 @@ public interface AuthenticationProvider {
 
 ## Spring Security - Auth0 JWT Library
 
-![주석 2020-08-04 160156](C:\Users\junho\TIL\images\주석 2020-08-04 160156.png)
+![주석 2020-08-04 160156](images\주석 2020-08-04 160156.png)
 
 - request가 들어오면 필터를 거친다
   - 필터는 여러개다. 가장 앞에 있는건 UsernamePasswordAuthenticationFilter
@@ -251,7 +251,7 @@ public interface AuthenticationProvider {
 
 ### Implicit Grant Flow
 
-![주석 2020-08-04 163854](C:\Users\junho\TIL\images\주석 2020-08-04 163854.png)
+![주석 2020-08-04 163854](images\주석 2020-08-04 163854.png)
 
 ### 유저 객체 설계
 
@@ -274,8 +274,9 @@ public interface AuthenticationProvider {
 
 - FormLoginAuthenticationSuccessHandler
   - PostAuthorizationToken이 Provider에서 넘어오면 (Provider의 authenticate()의 리턴값이 PostAuthorizationToken임.) 넘어온 토큰을 가지고 successfulAuthentication()을 호출한다.
+  - 
 
-
+ (..작성중..)
 
 
 
