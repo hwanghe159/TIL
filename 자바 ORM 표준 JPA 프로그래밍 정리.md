@@ -199,6 +199,7 @@ ORM 프레임워크 : 객체와 테이블을 매핑해서 패러다임의 불일
 테이블과 매핑할 클래스에 필수로 붙여야 한다. 
 
 - 기본 생성자는 필수다.(파라미터 없는 public이나 protected 생성자)
+  - JPA가 기본 생성자를 사용하여 엔티티 객체를 생성하기 때문
 - final클래스, enum, interface, inner클래스에는 사용할 수 없다.
 - 저장할 필드에 final을 사용하면 안된다.
 
@@ -214,7 +215,15 @@ JPA는 매핑 정보를 보고 DB스키마를 자동으로 생성해준다.
 
 `<property name="hibernate.hbm2ddl.auto" value="create" />`
 
- hibernate.hbm2ddl.auto의 속성은 다음과 같다.
+> application.properties 방식으로는
+>
+> ```properties
+> spring.jpa.hibernate.ddl-auto=create
+> ```
+
+스키마 자동생성 기능을 운영서버에선 사용하지 말자! 초반 학습 차원에서만 사용하기
+
+ `hibernate.hbm2ddl.auto`의 속성은 다음과 같다.
 
 | 옵션             | 설명                                                         |
 | ---------------- | ------------------------------------------------------------ |
@@ -234,13 +243,34 @@ JPA는 매핑 정보를 보고 DB스키마를 자동으로 생성해준다.
 
 스테이징과 운영서버 : validate, 또는 사용안함
 
+### DDL 생성 기능
+
+- 회원 이름이 필수고, 10자를 초과하면 안된다면?
+
+  ```java
+  @Column(nullable = false, length = 10)
+  private String username;
+  ```
+
+  위와 같이 수정하고 생성된 DDL을 보면
+
+  ```sql
+  create table MEMBER (
+      ...
+  	USERNAME varchar(10) not null
+      ...
+  )
+  ```
+
+- JPA는 위처럼 애플리케이션 실행 동작에는 영향을 주지 않지만, 자동 생성되는 DDL을 위한 기능들이 있다.
+
 ### @Id
 
 기본 키를 직접 할당하려면 `@Id`만 붙이면 되고,
 
 자동 생성 하려면 `@GeneratedValue`도 함께 붙여준다.
 
-- IDENTITY 전략
+- `IDENTITY` 전략
 
   - `@GeneratedValue(strategy = GenerationType.IDENTITY)`만 붙이면 됨
 
@@ -248,7 +278,7 @@ JPA는 매핑 정보를 보고 DB스키마를 자동으로 생성해준다.
 
   - 트랜잭션을 지원하는 쓰기 지연이 동작하지 않는다.
 
-- SEQUENCE 전략
+- `SEQUENCE` 전략
 
   - 데이터베이스 시퀀스(유일한 값을 순서대로 생성하는 특별한 DB 오브젝트)를 사용해서 기본키를 할당한다.
 
@@ -271,7 +301,7 @@ JPA는 매핑 정보를 보고 DB스키마를 자동으로 생성해준다.
 
     SEQUENCE 전략은 `DB시퀀스를 사용해서 식별자 조회 -> 엔티티에 할당 -> 영속성 컨텍스트에 저장`이다.
 
-- TABLE 전략
+- `TABLE` 전략
 
   - 키 생성 전용 테이블을 하나 만들고 이름과 값으로 사용할 컬럼을 만들어서 시퀀스를 흉내내는 전략이다.
 
