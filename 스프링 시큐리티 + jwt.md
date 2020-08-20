@@ -91,7 +91,7 @@ public interface AuthenticationProvider {
 
 ### ProviderManager를 사용하는 AuthenticationManager 계층구조
 
-![authentication](.\images\authentication.png)
+![authentication](./images/authentication.png)
 
 - ```java
   public class ProviderManager implements AuthenticationManager, MessageSourceAware, InitializingBean {
