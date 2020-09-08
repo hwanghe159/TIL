@@ -262,6 +262,18 @@ public interface AuthenticationProvider {
 
 
 
+### JWT
+
+JWT(Json Web Token)은 JSON 객체를 통해 안전하게 정보를 전송할 수 있는 웹표준(RFC7519)
+
+헤더, 내용, 서명으로 이루어져 있음
+
+- 헤더(header) : 토큰 타입, 해싱 알고리즘 저장
+- 내용(payload) : 실제로 전달할 정보, 회원을 구분할 수 있는 정보가 담김 (정보의 한 조각을 Claim이라 함)
+- 서명(signature) : 위변조를 방지하기 위한 값
+
+
+
 ## FormLoginFilter + JWT Factory + JWT Authentication Provider / Filter로 AJAX로그인 구현하기!
 
 - FormLoginFilter : 최초 로그인을 시도할때 로그인 요청을 걸러내는 필터
