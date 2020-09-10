@@ -38,6 +38,21 @@ graph = [[0] * m for _ in range(n)]
 
 
 
+### 2차원 배열 시계방향 90도 회전
+
+```python
+def rotate_90_degree(matrix):
+    n = len(matrix)
+    m = len(matrix[0])
+    result = [[0] * n for _ in range(m)]
+    for i in range(n):
+        for j in range(m):
+            result[j][n - i - 1] = matrix[i][j]
+    return result
+```
+
+
+
 ### DFS로 덩어리 개수 구하기
 
 ```python
