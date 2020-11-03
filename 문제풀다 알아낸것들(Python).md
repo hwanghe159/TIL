@@ -122,3 +122,35 @@ result = sorted(arr) # arr는 변경되지 않음
 arr.sort() # arr는 변경됨
 ```
 
+### 진수 변환
+
+```python
+# 10진수 -> 2,8,16진수 (반환형은 문자열)
+bin(n)
+oct(n)
+hex(n)
+
+# 10진수 -> (base)진수
+def convert(n, base):
+    T = "0123456789ABCDEF"
+    q, r = divmod(n, base)
+    if q == 0:
+        return T[r]
+    else:
+        return convert(q, base) + T[r]
+    
+#(base)진수 -> 10진수
+int(num, base=10) # num은 문자열
+```
+
+### 배열 다루기
+
+```python
+arr = ["a", "b", "c", "d", "e", "f", "g", "h"]
+
+arr[5:0:-1] # ['f', 'e', 'd', 'c', 'b']
+arr[5::-1] # ['f', 'e', 'd', 'c', 'b', 'a']
+arr[::-1] # ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a']
+arr[::] # ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+```
+
