@@ -161,3 +161,19 @@ arr[::-1] # ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a']
 arr[::] # ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 ```
 
+### 딕셔너리 정렬
+
+```python
+dict = {'A': 2, 'D': 3, 'C': 4, 'B': 1}
+
+# key기준 오름차순(내림차순은 reverse=True를 두번째 인자에 추가하기)
+sorted(dict) # ['A', 'B', 'C', 'D']
+sorted(dict.keys()) # ['A', 'B', 'C', 'D']
+sorted(dict.items()) # [('A', 2), ('B', 1), ('C', 4), ('D', 3)]
+sorted(dict.values()) # [1, 2, 3, 4]
+sorted(dict.items(), key=lambda item: item[0]) # [('A', 2), ('B', 1), ('C', 4), ('D', 3)]
+
+# value기준 오름차순(내림차순은 reverse=True를 두번째 인자에 추가하기)
+sorted(dict.items(), key=lambda item: item[1]) # [('B', 1), ('A', 2), ('D', 3), ('C', 4)]
+```
+
