@@ -177,3 +177,15 @@ sorted(dict.items(), key=lambda item: item[0]) # [('A', 2), ('B', 1), ('C', 4), 
 sorted(dict.items(), key=lambda item: item[1]) # [('B', 1), ('A', 2), ('D', 3), ('C', 4)]
 ```
 
+### 정규표현식에 해당하는 문자열 추출
+
+```python
+import re
+
+results = re.findall("(\d+)([SDT])([*#]?)", "1D2S#10S")
+print(results) # [('1', 'D', ''), ('2', 'S', '#'), ('10', 'S', '')]
+
+results = re.findall("\d+[SDT][*#]?", "1D2S#10S")
+print(results) # ['1D', '2S#', '10S']
+```
+
