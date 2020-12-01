@@ -10,6 +10,17 @@ Arrays.sort(arr, Comparator.reverseOrder()); //내림차순 (int[]이 아닌 Int
 //리스트
 Collections.sort(list);
 Collections.reverse(list);
+
+//객체의 리스트
+public class Person {
+    private String name;
+    private int age;
+}
+
+List<Person> orderedPeople = people.stream()
+                .map(Person::getAge)
+                .sorted(Comparator.comparingInt(Person::getAge))
+                .collect(Collectors.toList());//List<Person> 나이순 오름차순 정렬
 ```
 
 
