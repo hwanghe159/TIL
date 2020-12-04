@@ -189,3 +189,13 @@ results = re.findall("\d+[SDT][*#]?", "1D2S#10S")
 print(results) # ['1D', '2S#', '10S']
 ```
 
+### deque 다루기
+
+```python
+from collections import deque
+
+q = deque([(1, 1, 1), (1, 1, 2), (2, 1, 1)])
+q = sorted(q)  # 오름차순정렬 [(1, 1, 1), (1, 1, 2), (2, 1, 1)] 내림차순하려면 reverse=True추가
+print(max(q))  # (2, 1, 1)
+```
+
