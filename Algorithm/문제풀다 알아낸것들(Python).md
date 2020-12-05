@@ -89,7 +89,7 @@ print(result)
 
 
 
-### 스택, 큐
+### 스택, 큐, 덱
 
 ```python
 # 스택
@@ -112,6 +112,17 @@ queue = [1]
 
 queue.append(5)
 del queue[0]
+
+# 덱
+from collections import deque
+
+deque = deque([1, 2, 3])
+
+deque.append(4) #오른쪽에 요소 삽입
+deque.appendleft(5) #왼쪽에 요소 삽입
+deque.pop() #오른쪽 요소 삭제
+deque.popleft() #왼쪽 요소 삭제
+deque.insert(1, 100) #인덱스 1번째에 100 삽입
 ```
 
 ### arr.sort() 와 sorted(arr)의 차이
