@@ -4,6 +4,10 @@
 a, b = map(int, input()) # 12 입력하면 a=1, b=2
 a, b = map(int, input().split()) # 1 2 입력하면 a=1, b=2
 arr = list(map(int, input().split())) # 1 2 3 입력하면 arr=[1, 2, 3]
+
+#한 줄 입력받기
+import sys
+input_data = sys.stdin.readline().rstrip()
 ```
 
 
