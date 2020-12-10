@@ -165,7 +165,7 @@ def convert(n, base):
 int(num, base=10) # num은 문자열
 ```
 
-### 배열 다루기
+### 배열 조작
 
 ```python
 arr = ["a", "b", "c", "d", "e", "f", "g", "h"]
@@ -174,6 +174,13 @@ arr[5:0:-1] # ['f', 'e', 'd', 'c', 'b']
 arr[5::-1] # ['f', 'e', 'd', 'c', 'b', 'a']
 arr[::-1] # ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a']
 arr[::] # ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+```
+
+### 배열 filter
+
+```python
+arr = [1, 2, 3, 4, 5]
+list(filter(lambda x: x < 3, arr)) # [1, 2]
 ```
 
 ### 딕셔너리 정렬
