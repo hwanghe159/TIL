@@ -221,3 +221,76 @@ q = sorted(q)  # 오름차순정렬 [(1, 1, 1), (1, 1, 2), (2, 1, 1)] 내림차�
 print(max(q))  # (2, 1, 1)
 ```
 
+### 다익스트라 알고리즘(특정노드 -> 모든노드 최단거리)
+
+```python
+import heapq
+
+INF = int(1e9)
+
+n, m = map(int, input().split())
+start = int(input())
+graph = [[] for i in range(n + 1)]
+distance = [INF] * (n + 1)
+
+for _ in range(m):
+    a, b, c = map(int, input().split())
+    graph[a].append((b, c))
+
+
+def dijkstra(start):
+    q = [] #현재 가장 가까운 노드를 저장하기 위한 목적으로만 우선순위큐 사용
+    heapq.heappush(q, (0, start))  # 거리, 노드
+    distance[start] = 0
+    while q:
+        dist, now = heapq.heappop(q)
+        if distance[now] < dist: #꺼냈는데 이미 처리된 노드면(꺼낸게 더 크면) 무시
+            continue
+        for next_node, next_cost in graph[now]:
+            cost = dist + next_cost
+            if cost < distance[next_node]: #더 작으면 갱신하고 우선순위큐에 삽입
+                distance[next_node] = cost
+                heapq.heappush(q, (cost, next_node))
+
+
+dijkstra(start)
+
+for i in range(1, n + 1):
+    if distance[i] == INF:
+        print("INFINITY")
+    else:
+        print(distance[i])
+
+
+
+6 11
+1
+1 2 2
+1 3 5
+1 4 1
+2 3 3
+2 4 2
+3 2 3
+3 6 5
+4 3 3
+4 5 1
+5 3 1
+5 6 2
+```
+
+### 우선순위 큐(heapq 이용)
+
+```python
+import heapq
+
+q = []
+heapq.heappush(q, (1, 2))
+heapq.heappush(q, (2, 1))
+heapq.heappush(q, (4, 1))
+heapq.heappush(q, (1, 3))
+heapq.heappop(q)
+heapq.heappop(q)
+heapq.heappop(q)
+heapq.heappop(q) #(1, 2), (1, 3), (2, 1), (4, 1)순으로 조회
+```
+
