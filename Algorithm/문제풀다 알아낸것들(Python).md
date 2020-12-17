@@ -294,3 +294,27 @@ heapq.heappop(q)
 heapq.heappop(q) #(1, 2), (1, 3), (2, 1), (4, 1)순으로 조회
 ```
 
+### 커스텀 정렬
+
+```python
+from functools import cmp_to_key
+
+def compare(int1, int2):  # 길이가 긴 순, 길이가 같으면 숫자가 큰 순
+    int1string = str(int1)
+    int2string = str(int2)
+    if len(int1string) < len(int2string):
+        return 1
+    elif len(int1string) > len(int2string):
+        return -1
+    else:
+        if int1 < int2:
+            return 1
+        elif int1 == int2:
+            return 0
+        else:
+            return -1
+
+numbers = [5, 2, 6, 123, 321]
+numbers = sorted(numbers, key=cmp_to_key(compare)) #[321, 123, 6, 5, 2]
+```
+
