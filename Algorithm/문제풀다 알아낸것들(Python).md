@@ -318,3 +318,24 @@ numbers = [5, 2, 6, 123, 321]
 numbers = sorted(numbers, key=cmp_to_key(compare)) #[321, 123, 6, 5, 2]
 ```
 
+### 배열 글자순 정렬
+
+```python
+arr = ["a", "abc", "ab", "abcd"]
+arr.sort(key=len) #['a', 'ab', 'abc', 'abcd']
+arr.sort(key=len, reverse=True) #['abcd', 'abc', 'ab', 'a']
+```
+
+### 순열과 조합
+
+```python
+from itertools import permutations
+from itertools import combinations
+
+arr = ['a', 'b', 'c']
+list(permutations(arr)) #[('a', 'b', 'c'), ('a', 'c', 'b'), ('b', 'a', 'c'), ('b', 'c', 'a'), ('c', 'a', 'b'), ('c', 'b', 'a')]
+list(map(''.join, permutations(arr))) #['abc', 'acb', 'bac', 'bca', 'cab', 'cba']
+list(combinations(arr, 3)) #[('a', 'b', 'c')]
+list(map(''.join, combinations(arr, 3))) #['abc']
+```
+
