@@ -339,3 +339,45 @@ list(combinations(arr, 3)) #[('a', 'b', 'c')]
 list(map(''.join, combinations(arr, 3))) #['abc']
 ```
 
+### 리스트 각 원소의 빈도수 구하기
+
+```python
+result = {}
+arr = [1, 2, 3, 3, 4, 4, 4, 4]
+for elem in arr:
+    try:
+        result[elem] += 1
+    except:
+        result[elem] = 1
+print(result) #{1: 1, 2: 1, 3: 2, 4: 4}
+```
+
+### 합집합, 교집합, 차집합
+
+```python
+arr1 = {1, 2, 3, 4, 5}
+arr2 = {4, 5, 6, 7, 8}
+arr1 | arr2 #{1, 2, 3, 4, 5, 6, 7, 8}
+arr1 & arr2 #{4, 5}
+arr1 - arr2 #{1, 2, 3}
+```
+
+### 언패킹
+
+```python
+arr = [1, 2, 3]
+sum(*arr) # 6
+# sum(*arr) -> sum(1, 2, 3) -> 6
+```
+
+### 동일한 개수로 이루어진 자료형 묶기(zip)
+
+```python
+list(zip([1, 2, 3], [4, 5, 6])) #[(1, 4), (2, 5), (3, 6)]
+
+arr = ["aaa", "bbb", "ccc"]
+zip(*arr) #<zip object at 0x02E96448>
+list(zip(*arr)) #[('a', 'b', 'c'), ('a', 'b', 'c'), ('a', 'b', 'c')]
+map(list, zip(*arr)) #<map object at 0x0126EBF8>
+list(map(list, zip(*arr))) #[['a', 'b', 'c'], ['a', 'b', 'c'], ['a', 'b', 'c']]
+```
