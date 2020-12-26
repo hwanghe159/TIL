@@ -472,3 +472,17 @@ HTML태그를 반복해서 표시하고 싶을때 사용한다.
 }
 ```
 
+
+
+## vuetify
+
+```vue
+<--! sm범위에선 2:10  -->
+<v-container>
+	<v-row>
+        <v-col sm="2">
+        <v-col sm="10">
+    </v-row>
+</v-container>
+```
+
