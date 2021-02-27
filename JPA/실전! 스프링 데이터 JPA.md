@@ -10,3 +10,40 @@
     - `org.springframework.data.repository.Repository`를 구현한 클래스가 스캔 대상.
   - 컴포넌트 스캔을 스프링 데이터 JPA가 자동으로 처리하기 때문에 `@Repository` 생략 가능
 
+### JpaRepository 뜯어보기
+
+```java
+package org.springframework.data.jpa.repository;
+
+public interface JpaRepository<T, ID> extends PagingAndSortingRepository<T, ID>, QueryByExampleExecutor<T> {
+  ...
+}
+```
+
+```java
+package org.springframework.data.repository;
+
+public interface PagingAndSortingRepository<T, ID> extends CrudRepository<T, ID> {
+  ...
+}
+```
+
+```java
+package org.springframework.data.repository;
+
+public interface CrudRepository<T, ID> extends Repository<T, ID> {
+  //기본적인 CRUD
+}
+```
+
+```java
+package org.springframework.data.repository;
+
+public interface Repository<T, ID> {
+  //마커 인터페이스
+}
+```
+
+- JpaRepository는 org.springframework.data.jpa.repository 안에있음 (스프링데이터JPA 프로젝트)
+- PagingAndSortingRepository는 org.springframework.data.repository 안에 있음 (페이징, 소팅 등등은 어떤 DB든 공통이므로)
+
