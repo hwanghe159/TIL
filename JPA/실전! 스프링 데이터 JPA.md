@@ -44,6 +44,19 @@ public interface Repository<T, ID> {
 }
 ```
 
-- JpaRepository는 org.springframework.data.jpa.repository 안에있음 (스프링데이터JPA 프로젝트)
-- PagingAndSortingRepository는 org.springframework.data.repository 안에 있음 (페이징, 소팅 등등은 어떤 DB든 공통이므로)
+- `JpaRepository`는 `org.springframework.data.jpa.repository` 안에있음 (스프링데이터JPA 프로젝트)
+- `PagingAndSortingRepository`, `CrudRepository`, `Repository`는 `org.springframework.data.repository` 안에 있음 (페이징, 소팅 등등은 어떤 DB든 공통이므로)
 
+### 쿼리 메서드
+
+쿼리 메서드 기능 3가지
+
+1. 메소드 이름으로 쿼리 생성
+   - https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.query-creation
+   - find...By, read...By, query...By,  get...By
+     - By는 필수, By뒤에 아무것도 없으면 전체조회
+   - count...By, exists...By, delete...By, remove...By
+   - findDistinct, findMemberDistinctBy
+   - findFirst3, findFirst, findTop, findTop3
+2. 메소드 이름으로 JPA NamedQuery 호출
+3. `@Query` 어노테이션을 사용해서 리파지토리 인터페이스에 쿼리 직접 정의
