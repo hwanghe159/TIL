@@ -52,11 +52,34 @@ public interface Repository<T, ID> {
 쿼리 메서드 기능 3가지
 
 1. 메소드 이름으로 쿼리 생성
+
    - https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.query-creation
    - find...By, read...By, query...By,  get...By
      - By는 필수, By뒤에 아무것도 없으면 전체조회
    - count...By, exists...By, delete...By, remove...By
    - findDistinct, findMemberDistinctBy
    - findFirst3, findFirst, findTop, findTop3
+
 2. 메소드 이름으로 JPA NamedQuery 호출
+
+   - ```java
+     @Entity
+     @NamedQuery(
+     	name="abc",
+       query="select m from Member m where m.username = :username"
+     )
+     public class Member {
+       ...
+     }
+     ```
+
+     ```java
+     public interface MemberRepository extends JpaRepository<Member, Long> {
+       @Query(name = "abc")
+       List<Member> findByUsername(@Param("username") String username);
+     }
+     ```
+
+   - 실무에서 쓰일 일 없음
+
 3. `@Query` 어노테이션을 사용해서 리파지토리 인터페이스에 쿼리 직접 정의
