@@ -80,6 +80,24 @@ public interface Repository<T, ID> {
      }
      ```
 
+   - 가장 큰 장점은 문법 오류를 애플리케이션 로딩 시점에 잡아낼 수 있음
+
    - 실무에서 쓰일 일 없음
 
 3. `@Query` 어노테이션을 사용해서 리파지토리 인터페이스에 쿼리 직접 정의
+
+   - ```java
+     @Query("select m from Member m where m.username= :username and m.age = :age")
+     List<Member> findUser(@Param("username") String username, @Param("age") int age);
+     ```
+
+   - 메서드 이름이 길어지는 걸 막을 수 있음
+
+   - 문법 오류시엔 애플리케이션 로딩 시에 잡아낼 수 있음(이름없는 NamedQuery라 보면 됨)
+
+   - @Query에서 정의한 쿼리는 정적 쿼리니까 애플리케이션 로딩 시점에 파싱해서 sql을 다 만들어놓음
+
+   - 권장하는 기능
+
+   - 메서드 이름으로 메서드 만들땐 간단한거 주로 하고, 좀 복잡해지면 이 방법을 사용
+
