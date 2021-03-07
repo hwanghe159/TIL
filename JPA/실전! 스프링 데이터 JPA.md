@@ -101,3 +101,19 @@ public interface Repository<T, ID> {
 
    - 메서드 이름으로 메서드 만들땐 간단한거 주로 하고, 좀 복잡해지면 이 방법을 사용
 
+   - 값 조회
+
+     - ```java
+       @Query("select m.username from Member m")
+       List<String> findUsernameList();
+       ```
+
+   - DTO로 직접 조회
+
+     - ```java
+       @Query("select new study.datajpa.repository.MemberDto(m.id, m.username, t.name) from Member m join m.team t")
+       List<MemberDto> findMemberDto();
+       ```
+
+     - `new`와 패키지 정보를 다 적어줘야 한다.
+
