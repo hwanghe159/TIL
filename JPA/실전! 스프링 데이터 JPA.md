@@ -117,3 +117,26 @@ public interface Repository<T, ID> {
 
      - `new`와 패키지 정보를 다 적어줘야 한다.
 
+### 파라미터 바인딩
+
+- 이름기반과 위치기반이 있는데 이름기반을 쓰자 (가독성, 유지보수성 측면에서)
+
+- 컬렉션 타입으로 in절 지원
+
+  ```java
+  @Query("select m from Member m where m.username = :names")
+  List<Member> findByNames(@Param("names") List<String> names);
+  ```
+
+### 반환타입
+
+- 반환타입으로 컬렉션, 단건, Optional 모두 가능 (그 외에도 void, primitive, 래퍼타입, T, Iterator, Stream, Future, Page 등..)
+- 컬렉션
+  - 조회 결과가 없으면 null이 아니라 빈 컬렉션 반환해줌
+- 단건
+  - 조회 결과가 없으면 null 반환함
+  - 순수 JPA는 예외가 터지지만, 스프링 데이터 JPA는 이 예외를 감싸서 null을 반환함
+  - 결과가 있을지 모르는 경우는 비추
+- Optional
+  - 결과가 2개 이상인 경우 예외 발생 (스프링이`NonUniqueResultException`를 잡아서  `IncorrectResultSizeDataAccessException` 터뜨림)
+
