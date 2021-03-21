@@ -1,5 +1,6 @@
 - 스프링 공식 문서 스프링 MVC로 웹 컨텐츠 서빙 https://spring.io/guides/gs/serving-web-content/
 - 타임리프3 공식문서 https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#introducing-thymeleaf
+- Spring Boot로 웹 출시까지 재생목록 https://youtube.com/playlist?list=PLPtc9qD1979DG675XufGs0-gBeb2mrona
 
 ---
 
