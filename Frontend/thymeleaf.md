@@ -31,3 +31,22 @@
   - if-then : (if) ? (then)
   - if-then-else : (if) ? (then) : (else)
   - Default : (value) ?: (defaultValue)
+
+
+
+- `th:fragment`와 `th:replace`로 코드 재사용하기
+
+```html
+<!-- fragment/navbar.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<nav th:fragment="navbar">
+  ...
+</nav>
+</html>
+```
+
+```html
+<!-- index.html -->
+<div th:replace="fragment/navbar :: navbar"></div>
+```
