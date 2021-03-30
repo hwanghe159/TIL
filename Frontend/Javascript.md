@@ -26,57 +26,41 @@ console.log(jisoo.getType()); //인간
 
 ### 옵저버 패턴
 
-```javascript
-var Subject = (function() {
-  function Subject() {
-    this.subscribers = [];
-  }
-  Subject.prototype.publish = function() {
-    var self = this;
-    this.subscribers.forEach(function(subscriber) {
-      subscriber.fire(self);
-    });
-  };
-  Subject.prototype.register = function(target) {
-    this.subscribers.push(target);
-  };
-  return Subject;
-})();
+- https://rinae.dev/posts/why-every-beginner-front-end-developer-should-know-publish-subscribe-pattern-kr
 
-var Observer = (function() {
-  function Observer() {
-    this.list = [];
-  }
-  Observer.prototype.subscribe = function(target) {
-    this.list.push({
-      target: target,
-      point: 0,
-    });
-    target.register(this);
-  };
-  Observer.prototype.unsubscribe = function(target) {
-    this.list = this.list.filter(function(person) {
-      return person.target !== target;
-    });
-  };
-  Observer.prototype.fire = function(target) {
-    this.list.some(function(person) {
-      console.log(person.target, target, person.target === target);
-      if (person.target === target) {
-        ++person.point;
-        return true;
-      }
-    });
-  };
-  return Observer;
-})();
+```javascript
+//Publisher
+
+let data;
+let listeners = [];
+
+export function subscribe(callback) {
+  listeners.push(callback);
+}
+
+function publish(data) {
+  listeners.forEach(listener => {
+    listener(data);
+  });
+}
+
+export function setData(data) {
+  data = data;
+  publish(data);
+}
+
+export function getData() {
+  return data;
+}
 ```
 
 ```javascript
-var subject = new Subject();
-var observer = new Observer();
-observer.subscribe(subject);
-subject.publish();
-observer.list; //[{ target: Subject, point: 1 }]
+//Subscriber
+
+function renderManagementPage(data) {
+  // 정보의 변화가 생길 시 취할 행동 정의
+}
+
+subscribe(renderManagementPage);
 ```
 
