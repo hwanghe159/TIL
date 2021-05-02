@@ -34,3 +34,24 @@ select *
 from customers c join orders o on c.customerid = o.customerid
 ```
 
+- 모든 매장의 정보와 매출액 구하기
+
+  ```sql
+  -- 매장id와 매출액(소수점 2째자리까지)
+  select supplierId, round(sum(quantity * price), 2) as totalSales
+  from orderDetails od join products p
+  	on od.productId = p.productId
+  group by supplierId
+  
+  -- 모든 매장의 정보와 매출액
+  select *
+  from suppliers s join (
+    select SupplierID, round(sum(quantity * price), 2) as totalSales
+    from orderDetails od join products p
+        on od.productId = p.productId
+    group by supplierID
+  ) ts
+  on s.supplierID = ts.SupplierID
+  ```
+
+  
