@@ -54,4 +54,42 @@ from customers c join orders o on c.customerid = o.customerid
   on s.supplierID = ts.SupplierID
   ```
 
+- 고객 나라별 가장 선호하는(가장 많은 돈을 쓴) 상품의 카테고리
+
+  ```sql
+  -- 고객id, 나라, 상품id, 양 -> A
+  select customerId, country, productId, quantity
+  from (
+  	select c.customerId, orderId, country
+  	from customers c join orders o
+  		on c.customerId = o.customerId
+  ) co join orderDetails od
+  	on co.orderId = od.orderId
+  
+  -- 상품id, 카테고리이름, 가격 -> B
+  select productId, categoryName, price
+  from products p join categories c
+  	on p.categoryId = c.categoryId
+  
+  -- A와 B 조인 -> 나라, 카테고리이름, 총매출
+  select country, categoryName, sum(price * quantity) total
+  from
+  (
+    select customerId, country, productId, quantity
+    from (
+      select c.customerId, orderId, country
+      from customers c join orders o
+        on c.customerId = o.customerId
+  ) co join orderDetails od
+  	on co.orderId = od.orderId
+  ) A join
+  (
+    select productId, categoryName, price
+    from products p join categories c
+      on p.categoryId = c.categoryId
+  ) B
+  on A.productId = B.productId
+  group by country, categoryName
+  ```
+  
   
