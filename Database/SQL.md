@@ -93,3 +93,16 @@ from customers c join orders o on c.customerid = o.customerid
   ```
   
   
+
+## group by
+
+- 연별 주문 수
+
+  ```sql
+  select year(orderDate), count(*)
+  from orders
+  group by year(orderDate)
+  ```
+
+  
+
