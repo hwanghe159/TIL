@@ -47,5 +47,9 @@ Box<String> b = new Box<String>();
 <?>						//제한 없음. 모든 타입 가능. <? extends Object>와 동일
 ```
 
+</br>
+
+### `Collection` vs `Collection<Object>` vs `Collection<?>`
+
 
 
