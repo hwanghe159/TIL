@@ -140,3 +140,14 @@ public interface Repository<T, ID> {
 - Optional
   - 결과가 2개 이상인 경우 예외 발생 (스프링이`NonUniqueResultException`를 잡아서  `IncorrectResultSizeDataAccessException` 터뜨림)
 
+### 페이징
+
+- 페이징과 정렬 파라미터
+  - `Sort` -> 정렬 기능
+  - `Pageable` -> 페이징 기능
+- 특별한 반환타입
+  - `Page` -> total count가 필요할때 씀. total count쿼리를 따로 날림
+    - `getTotalElements()`: 전체 개수, `getNumber()`: 페이지 번호, `getTotalPages()`: 전체 페이지 개수, `isFirst()`: 첫번째 페이지인지, `hasNext()`: 다음 페이지 있는지
+  - `Slice` -> total count가 필요없을때 (모바일에서 더보기)
+  - `List` -> 추가 count쿼리 없이 결과만 반환
+
