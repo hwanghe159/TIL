@@ -145,9 +145,41 @@ public interface Repository<T, ID> {
 - 페이징과 정렬 파라미터
   - `Sort` -> 정렬 기능
   - `Pageable` -> 페이징 기능
+  
 - 특별한 반환타입
   - `Page` -> total count가 필요할때 씀. total count쿼리를 따로 날림
     - `getTotalElements()`: 전체 개수, `getNumber()`: 페이지 번호, `getTotalPages()`: 전체 페이지 개수, `isFirst()`: 첫번째 페이지인지, `hasNext()`: 다음 페이지 있는지
   - `Slice` -> total count가 필요없을때 (모바일에서 더보기)
+    - 3개 조회요청이라면 4개를 불러옴 -> 다음에 더 있는지만 알 수 있다.
   - `List` -> 추가 count쿼리 없이 결과만 반환
+  
+- `Page<Member>` -> `Page<MemberDto>` 변환가능
+
+  - ```java
+    Page<Member> page = ...;
+    Page<MemberDto> dto = page.map(member -> MemberDto.of(member));
+    ```
+
+- 카운트 쿼리는 무겁다.
+
+  - 데이터는 left join, 카운트 쿼리는 left join 안해도 됨.
+  - `@Query(value = "...", countQuery = "...")`
+
+### 벌크성 수정 쿼리
+
+예를 들어 "20살 이상의 모든 회원의 나이를 +1해라" 라는 명령 같은 경우에는 한명한명 수정해서 더티체킹을 이용하는 것보단 한번에 update쿼리로 하는게 효율적이다. 이를 벌크성 수정 쿼리라고 한다
+
+```java
+// @Modifying을 붙여줘야 getResultList()나 getSingleResult()가 아닌 executeUpdate()가 실행되어 오류가 발생하지 않음
+// int를 반환해야함 (update가 적용된 row 개수)
+@Modifying(clearAutomatically = true)
+@Query("update Member m set m.age = m.age + 1 where m.age >= :age")
+int bulkAgePlus(@Param("age") int age);
+```
+
+- 벌크 연산을 쓰면서 조심해야 할 점!
+  - 벌크 연산을 하면 영속성 컨텍스트를 무시하고 DB에 때려버림. 영속성 컨텍스트를 그걸 모름.
+  - 벌크 연산 후 api가 끝나서 트랜잭션이 끝나면 상관없지만 트랜잭션이 끝나기 전에 다른 조회가 발생하면 큰일남
+  - 그래서 벌크 연산 후엔 영속성 컨텍스트를 다 날려버려야 함
+    - `em.clear()` 하거나 `@Modifying(clearAutomatically = true)` 해야함
 
