@@ -183,3 +183,71 @@ int bulkAgePlus(@Param("age") int age);
   - 그래서 벌크 연산 후엔 영속성 컨텍스트를 다 날려버려야 함
     - `em.clear()` 하거나 `@Modifying(clearAutomatically = true)` 해야함
 
+### `@EntityGraph`
+
+- 들어가기 전.. N+1문제
+  - Member가 Team을 객체참조하고 있음
+
+  - ```java
+    List<Member> allMembers = memberRepository.findAll();
+    for (Member member : allMembers) {
+      System.out.println("member.team : " + member.getTeam().getName()); //N+1문제 발생
+    }
+    ```
+
+  - 해결하려면 fetch join
+
+    ```java
+    @Query("select m from Member m left join fetch m.team")
+    List<Member> findAllMemberFetchJoin();
+    ```
+
+- `@EntityGraph` 이용해서도 해결 가능
+
+  ```java
+  @Override
+  @EntityGraph(attributePaths = {"team"})
+  List<Member> findAll();
+  ```
+
+- `@EntityGraph`와 JPQL 섞어서 쓸수도 있음
+
+  ```java
+  @EntityGraph(attributePaths = {"team"})
+  @Query("select m from Member m")
+  List<Member> findMemberEntityGraph();
+  ```
+
+- 메서드 네이밍과 `@EntityGraph` 함께 이용 가능
+
+  ```java
+  @EntityGraph(attributePaths = {"team"})
+  List<Member> findEntityGraphByUsername(@Param("username") String username); //find뒤엔 아무거나 올 수 있음
+  ```
+
+영한님 의견 : 간단할땐 `@EntityGraph`쓰고 복잡할땐 JPQL씀
+
+### JPA 힌트
+
+- SQL 힌트가 아니고 JPA 구현체에게 제공하는 힌트
+- 쓰기는 못하게 하고 읽기만 가능하게 해서 더티체킹에 대한 리소스를 줄여 최적화할 수 있다
+- 그런데 큰 성능향상은 기대하기 어렵다. 성능에 가장 많은 영향을 주는 부분을 최적화하는게 더 효율적임
+
+```java
+@QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+Member findReadOnlyByUsername(String username);
+```
+
+### JPA Lock
+
+- JPA에서 락에 대한 어노테이션을 제공함
+
+```java
+@Lock(LockModeType.PESSIMISTIC_WRITE) //옵션이 많음.
+List<Member> findLockByUsername(String username);
+```
+
+영한님 의견 : 실시간 트래픽이 많은 서비스는 가급적이면 락을 많이 걸면 안됨
+
+
+
