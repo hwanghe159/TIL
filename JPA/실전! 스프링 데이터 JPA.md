@@ -249,5 +249,31 @@ List<Member> findLockByUsername(String username);
 
 영한님 의견 : 실시간 트래픽이 많은 서비스는 가급적이면 락을 많이 걸면 안됨
 
+### 사용자 정의 리파지토리 구현
+
+- 스프링 데이터 JPA가 제공하는 인터페이스를 직접 구현하면 구현해야 하는 기능이 너무 많음
+
+- 다양한 이유로 인터페이스의 메서드를 직접 구현하고 싶다면?
+
+  - JPA 직접 사용(EntityManager)
+  - 스프링 JDBC Template 사용
+  - MyBatis 사용
+  - 데이터베이스 커넥션 직접 사용
+  - Querydsl 사용할때 등등..
+
+- 구현하는 법
+
+  - 인터페이스를 따로 만들고(MemberRepositoryCustom), 그 인터페이스를 구현하는 클래스(MemberRepositoryCustomImpl)를 만들고 기능을 구현한다
+
+  - 만든 인터페이스를 기존의 레포지터리가 상속받는다
+
+    ```java
+    public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
+      ...
+    }
+    ```
+
+  - 자바에서 되는 건 아니고 spring data JPA가 이렇게 동작하도록 해주는 것
+
 
 
