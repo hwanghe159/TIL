@@ -311,18 +311,17 @@ JPA는 매핑 정보를 보고 DB스키마를 자동으로 생성해준다.
   - ```java
     @Entity
     @TableGenerator(
-    	name = "BOARD_SEQ_GENERATOR",
-    	table = "MY_SEQUENCES",
-        pkColumnValue = "BOARD_SEQ", allocationSize = 1)
+      name = "BOARD_SEQ_GENERATOR",
+      table = "MY_SEQUENCES",
+      pkColumnValue = "BOARD_SEQ", allocationSize = 1)
     public class Board {
-        @Id
-    	@GeneratedValue(strategy = GenerationType.TABLE,
-                       generator = "BOARD_SEQ_GENERATOR")
-        private Long id;
+      @Id
+      @GeneratedValue(strategy = GenerationType.TABLE, generator = "BOARD_SEQ_GENERATOR")
+      private Long id;
         ...
     }
     ```
-
+  
 - AUTO 전략
 
   - `@GeneratedValue.strategy`의 기본값이다.
