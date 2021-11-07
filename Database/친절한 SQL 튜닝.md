@@ -30,6 +30,39 @@
 
 ### 1.2 SQL 공유 및 재사용
 
+- 소프트 파싱 vs 하드 파싱
+
+  - DBMS가 SQL을 파싱한 후 해당 SQL이 라이브러리 캐시에 존재하는지 확인하여 
+    - 있으면? 곧바로 실행 (소프트 파싱)
+    - 없으면? 최적화 -> 로우소스 생성 -> 실행 (하드 파싱)
+
+- SQL 최적화를 할때 옵티마이저가 사용하는 정보
+
+  - 테이블, 컬럼, 인덱스 구조
+  - 오브젝트 통계 (테이블 통계, 인덱스 통계, 컬럼 통계)
+  - 시스템 통계 (CPU속도, Single Block I/O 속도, Multiblock I/O 속도)
+  - 옵티마이저 관련 파라미터 등등
+
+- 이렇게 많은 정보를 사용하여 무거운 연산을 통해 도출한 내부 프로시저를 한 번만 사용한다면 비효율적이다. 그래서 라이브러리 캐시가 필요하다
+
+- 바인드변수를 잘 활용해야 한다
+
+  - 예를 들어 다음과 같이 라이브러리 캐시가 남으면 안되고,
+
+    ```sql
+    SELECT * FROM CUSTOMER WHERE LOGIN_ID = 'hwang'
+    SELECT * FROM CUSTOMER WHERE LOGIN_ID = 'kim'
+    SELECT * FROM CUSTOMER WHERE LOGIN_ID = 'lee'
+    SELECT * FROM CUSTOMER WHERE LOGIN_ID = 'park'
+    ...
+    ```
+
+  - 다음과 같이 남아야 한다
+
+    ```sql
+    SELECT * FROM CUSTOMER WHERE LOGIN_ID = :1
+    ```
+
 ### 1.3 데이터 저장 구조 및 I/O 메커니즘
 
 <br/>
