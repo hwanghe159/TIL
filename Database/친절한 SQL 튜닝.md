@@ -168,7 +168,59 @@
 
 ### 2.3 인덱스 확장기능 사용법
 
+#### Index Range Scan
+
+<img src="../images/index range scan.jpeg" alt="index range scan" style="zoom:20%;" />
+
+- B-Tree 인덱스의 가장 일반적이고 정상적인 형태의 액세스 방식
+- 인덱스 루트에서 리프 블록까지 수직적으로 탐색한 후 필요한 범위만 스캔한다
+- 인덱스를 Range Scan 하려면 선두 컬럼을 가공하지 않은 상태로 조건절에서 사용해야 한다
+  - 반대로 말하면 선두 컬럼을 가공만 하지 않으면 Range Scan은 무조건 가능하므로 인덱스를 탄다고 성능도 무조건 좋다고 생각하면 안된다
+  - 성능은 인덱스 스캔 범위, 테이블 엑세스 횟수를 얼마나 줄일 수 있느냐로 결정된다
+
+#### Index Full Scan
+
+<img src="../images/index full scan.jpeg" alt="index full scan" style="zoom:20%;" />
+
+- 수직적 탐색 없이 인덱스 리프 블록을 처음부터 끝까지 수평적으로 탐색하는 방식
+- 대개 데이터 검색을 위한 최적의 인덱스가 없을때 차선으로 선택됨
+- 중략
+
+#### Index Unique Scan
+
+<img src="../images/index unique scan.jpeg" alt="index unique scan" style="zoom:20%;" />
+
+- 수직적 탐색으로만 데이터를 찾는 스캔 방식
+- unique 인덱스를 '=' 조건으로 탐색하는 경우 Index Unique Scan
+- 단, unique 인덱스라 하더라도 범위검색 조건(between, 부등호, like)으로 검색할떄는 Index Range Scan으로 처리된다
+- 또, unique 결합 인덱스에 대해 일부 컬럼만으로 검색할 때도 Index Range Scan으로 처리된다
+  - 예 : 주문상품 PK 인덱스를 "주문일자 + 고객id + 상품id"로 구성했는데 "주문일자 + 고객id"로만 검색하는 경우
+
+#### Index Skip Scan
+
+<img src="../images/index skip scan.jpeg" alt="index skip scan" style="zoom:20%;" />
+
+- 
+
+#### Index Fast Full Scan
+
+- Index Full Scan보다 빠른 스캔 방법
+  - 논리적인 인덱스 트리 구조를 무시하고 인덱스 세그먼트 전체를 Multiblock I/O방식으로 스캔하기 때문
+- 특징
+  - Multiblock I/O방식을 사용하므로 디스크로부터 대량의 인덱스 블록을 읽어야 할 때 큰 효과를 발휘한다
+  - 결과 집합이 인덱스 키 순서대로 정렬되지 않는다
+  - 쿼리에 사용한 컬럼이 모두 인덱스에 포함돼 있을때만 사용 가능하다
+  - 인덱스카 파티션 돼 있지 않더라도 병렬 쿼리가 가능하다
+
+#### Index Range Scan Descending
+
+<img src="../images/index range scan descending.jpeg" alt="index range scan descending" style="zoom:20%;" />
+
+- Index Range Scan과 기본적으로 동일하지만 인덱스를 뒤에서부터 스캔하기 때문에 내림차순으로 정렬된 결과집합을 얻는다
+
 <br/>
+
+
 
 ## 3장. 인덱스 튜닝
 
