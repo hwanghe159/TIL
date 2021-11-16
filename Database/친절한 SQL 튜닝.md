@@ -184,7 +184,9 @@
 
 - 수직적 탐색 없이 인덱스 리프 블록을 처음부터 끝까지 수평적으로 탐색하는 방식
 - 대개 데이터 검색을 위한 최적의 인덱스가 없을때 차선으로 선택됨
-- 중략
+- 조건절로 인해 결과값이 극히 일부라면 Table Full Scan보다 Index Full Scan이 효과적이다
+  - 하지만, 이는 차선책이므로 Index Range Scan이 수행되도록 인덱스를 생성해주는 게 좋다
+
 
 #### Index Unique Scan
 
@@ -192,7 +194,7 @@
 
 - 수직적 탐색으로만 데이터를 찾는 스캔 방식
 - unique 인덱스를 '=' 조건으로 탐색하는 경우 Index Unique Scan
-- 단, unique 인덱스라 하더라도 범위검색 조건(between, 부등호, like)으로 검색할떄는 Index Range Scan으로 처리된다
+- 단, unique 인덱스라 하더라도 범위검색 조건(between, 부등호, like)으로 검색할때는 Index Range Scan으로 처리된다
 - 또, unique 결합 인덱스에 대해 일부 컬럼만으로 검색할 때도 Index Range Scan으로 처리된다
   - 예 : 주문상품 PK 인덱스를 "주문일자 + 고객id + 상품id"로 구성했는데 "주문일자 + 고객id"로만 검색하는 경우
 
@@ -200,7 +202,8 @@
 
 <img src="../images/index skip scan.jpeg" alt="index skip scan" style="zoom:20%;" />
 
-- 
+- 루트 또는 브랜치 블록에서 읽은 컬럼 값 정보를 이용해 조건절에 부합하는 레코드를 포함할 가능성이 있는 리프 블록만 골라서 엑세스하는 스캔 방식
+- 인덱스 선두 컬럼의 카디널리티가 낮고, 후행 컬럼의 카디널리티가 높을때 유용하다
 
 #### Index Fast Full Scan
 
@@ -218,9 +221,32 @@
 
 - Index Range Scan과 기본적으로 동일하지만 인덱스를 뒤에서부터 스캔하기 때문에 내림차순으로 정렬된 결과집합을 얻는다
 
+#### 참고. MySQL의 실행계획
+
+- id : 각 SELECT문에 부여됨
+- select_type
+  - SIMPLE : 단순 SELECT문
+- table : 접근하는 테이블 이름
+- partitions 
+- type
+  - ALL : 테이블 풀 스캔
+  - index : 인덱스 풀 스캔
+  - range : 인덱스 레인지 스캔
+  - const : PK 혹은 UK로 조회하는 경우. 많아야 한 건
+- possible_keys : 사용 가능한 인덱스들
+- key : possible_keys중 실제로 사용할 인덱스
+- key_len : 인덱스에 얼마나 많은 바이트를 사용하고 있는지
+- ref
+- rows : 원하는 행을 찾기 위해 얼마나 많은 행을 읽어야 할 지에 대한 예측값
+- filtered : 행 데이터를 가져와 거기에서 WHERE 구의 검색 조건이 적용되면 몇행이 남는지 예측값
+- Extra
+  - Using where : where 조건으로 데이터를 추출. type이 ALL 혹은 INDEX 타입과 함께 표현되면 성능이 좋지 않다는 의미
+  - Using filesort : 데이터 정렬이 필요한 경우로 메모리 혹은 디스크상에서의 정렬을 모두 포함. 결과 데이터가 많은 경우 성능에 직접적인 영향을 줌
+  - Using index condition
+  - Using temporary
+  - Select tables optimized away
+
 <br/>
-
-
 
 ## 3장. 인덱스 튜닝
 
