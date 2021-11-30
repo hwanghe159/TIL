@@ -507,6 +507,13 @@
 
 ### 4.1 NL 조인
 
+- NL 조인(Nested Loop Join) = 인덱스를 이용한 조인
+- NL 조인의 기본 매커니즘
+  - ![employee_customer](../images/employee_customer.jpeg)
+  - 
+
+
+
 ### 4.2 소트 머지 조인
 
 ### 4.3 해시 조인
