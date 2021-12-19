@@ -12,4 +12,16 @@
   - 다수의 요청을 처리하기 위해
 - 단점
   - 쓰레드를 너무 많이 만들어놓으면 메모리 낭비다 (이를 방지하기 위해 `ForkJoinPool`이 있음)
+- 생성
+  - 초기 쓰레드 수 : 처음 기본적으로 생성되는 수
+  - 코어 쓰레드 수 : 최소 쓰레드 수
+  - 최대 쓰레드 수
+  - `newCachedThreadPool()`, `newFixedThreadPool(int nThreads)`
+- 종료
+  - `executorService.shutdown();` : 작업큐에 남아있는 작업까지 모두 마무리 후 종료
+  - `executorService.shutdownNow();` : 작업큐 작업 잔량 상관없이 강제 종료
+  - `excutorService.awaitTermination(long timeout, TimeUnit unit);` : 모든 작업 처리를 timeout 시간안에 처리하면 true 리턴 ,처리하지 못하면 작업스레드들을 `interrupt()`시키고 false리턴
+- 작업
+  - `execute();` : 결과 반환X, 예외발생시 쓰레드 종료 -> 쓰레드풀에서 제거됨, 다른 작업을 위해 새 쓰레드 생성
+  - `submit();` : 결과 반환O, 예외발생시 쓰레드 종료X 재사용
 
