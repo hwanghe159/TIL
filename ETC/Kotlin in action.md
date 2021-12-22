@@ -2,7 +2,30 @@
 
 ## 1장. 코틀린이란 무엇이며, 왜 필요한가?
 
-- <br/>
+- 코틀린 맛보기
+
+  ```kotlin
+  data class Person(val name: String, val age: Int? = null)
+  
+  fun main(args: Array<String>) {
+      val persons = listOf(Person("영희"), Person("철수", age = 20))
+      val oldest = persons.maxBy { it.age ?: 0 }
+      println("나이가 가장 많은 사람: $oldest")
+  }
+  ```
+
+  - `name`, `age`를 갖고 있는 데이터 클래스 `Person` 정의
+  - `age`의 디폴트 값은 null (`?`으로 디폴트값 지정 가능)
+  - null인 경우 지정된 값 반환하는 엘비스 연산자(`?:`)
+
+- 코틀린의 주요 특성
+
+  - 자바가 실행되는 모든 곳이 대상 플랫폼이다
+  - 정적 타입 지정 언어다
+  - 함수형 프로그래밍과 객체지향 프로그래밍
+  - 무료 오픈소스
+
+<br/>
 
 ## 2장. 코틀린 기초
 
