@@ -55,3 +55,40 @@
 
 ## FCM 메시지 정보
 
+- FCM을 통해 2가지 유형의 메시지를 보낼 수 있다
+
+  1. 알림 메시지(= 표시 메시지)
+     - FCM SDK에서 자동으로 처리한다
+     - 키 모음이 사전에 정의되어 있다.
+     - 데이터 페이로드가 포함될 수 있다 (선택사항)
+     - 최대 페이로드는 4000바이트
+     - `notification` 키를 설정하여 전송할 수 있다
+  2. 데이터 메시지
+     - 클라이언트 앱에서 처리한다
+     - 사용자가 정의한 커스텀 키-값 쌍만 포함된다
+     - 최대 페이로드는 4000바이트
+     - `data` 키를 설정하여 전송할 수 있다
+
+- 알림 메시지
+
+  - ```json
+    {
+      "message":{
+        "token":"bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...",
+        "notification":{
+          "title":"Portugal vs. Denmark",
+          "body":"great match!"
+        }
+      }
+    }
+    ```
+
+  - `notification` 키 안에 사전 정의된 키 옵션 모음(`title`, `body` 등)으로 설정한다
+
+    - 사전 정의된 키 전체 목록 : [HTTP v1](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=1#Notification), [기존 HTTP](https://firebase.google.com/docs/cloud-messaging/http-server-ref?authuser=1#notification-payload-support), [XMPP](https://firebase.google.com/docs/cloud-messaging/xmpp-server-ref?authuser=1#notification-payload-support)
+
+  - 앱이 백그라운드 상태이면 알림 메시지가 알림 목록으로 전송된다
+
+  - 앱이 포그라운드 상태이면 콜백 함수가 메시지를 처리한다
+
+  
