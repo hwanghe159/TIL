@@ -91,4 +91,111 @@
 
   - 앱이 포그라운드 상태이면 콜백 함수가 메시지를 처리한다
 
-  
+- 데이터 메시지
+
+  - ```json
+    {
+      "message":{
+        "token":"bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...",
+        "data":{
+          "Nick" : "Mario",
+          "body" : "great match!",
+          "Room" : "PortugalVSDenmark"
+        }
+      }
+    }
+    ```
+
+  - 클라이언트 앱이 `data`를 해석한다
+
+  - 커스텀 키-값 쌍에 예약어를 사용하면 안된다
+
+    - `from`, `notification`, `message_type`
+    - `google`이나 `gcm`으로 시작하는 모든 단어
+
+  - Android 전송 레이어에서는 지점간 암호화를 사용한다
+
+- 데이터 페이로드가 포함된 알림 메시지
+
+  - ```json
+    {
+      "message":{
+        "token":"bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...",
+        "notification":{
+          "title":"Portugal vs. Denmark",
+          "body":"great match!"
+        },
+        "data" : {
+          "Nick" : "Mario",
+          "Room" : "PortugalVSDenmark"
+        }
+      }
+    }
+    ```
+
+  - 앱이 백그라운드 상태일때 : 알림 페이로드(`notification`)가 앱의 알림 목록에 수신되며 사용자가 알림을 탭한 경우에만 앱이 데이터 페이로드(`data`)를 처리한다.
+
+  - 앱이 포그라운드 상태일때 : 앱에서 페이로드가 둘 다 제공되는 메시지 객체를 수신한다
+
+- 여러 플랫폼의 메시지 맞춤설정
+
+  - 공통 필드를 사용해야 하는 경우
+
+    - 모든 플랫폼에 보내고 싶을때
+    - 토픽으로 보내고 싶을때
+
+  - 플랫폼별 필드를 사용해야 하는 경우
+
+    - 특정 플랫폼에만 보내고 싶을때
+      - 예: Apple과 Web으로만 보내고 싶을땐 Apple용, Web용으로 각각 1개씩 개별 필드 모음을 사용해야 함
+    - 공통 필드 외에도 플랫폼 별 필드를 보내야 할 때
+      - 여러 플랫폼에 동일한 값을 설정하는 경우에도 플랫폼별 필드를 사용해야 한다 (플랫폼 별로 다르게 해석할 수 있기 때문)
+
+  - 플랫폼에 관계 없이 다음 공통 필드는 모든 앱 인스턴스가 해석할 수 있다
+
+    - [`message.notification.title`](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=1#Notification.FIELDS.title)
+    - [`message.notification.body`](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=1#Notification.FIELDS.body)
+    - [`message.data`](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=1#Message.FIELDS.data)
+
+  - 예
+
+    - ```json
+      {
+        "message":{
+           "token":"bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...",
+           "notification":{
+             "title":"Match update",
+             "body":"Arsenal goal in added time, score is now 3-0"
+           },
+           "android":{
+             "ttl":"86400s",
+             "notification"{
+               "click_action":"OPEN_ACTIVITY_1"
+             }
+           },
+           "apns": {
+             "headers": {
+               "apns-priority": "5",
+             },
+             "payload": {
+               "aps": {
+                 "category": "NEW_MESSAGE_CATEGORY"
+               }
+             }
+           },
+           "webpush":{
+             "headers":{
+               "TTL":"86400"
+             }
+           }
+         }
+       }
+      ```
+
+    - 
+
+
+
+## 메시지 전송 이해
+
+## FCM 등록 토큰 관리
