@@ -196,6 +196,39 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 메시지 전송 이해
 
 ## FCM 등록 토큰 관리
+
+# APNs
+
+- 푸시 알람을 위한 준비
+
+  <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdcC6a2%2FbtqObXnvFMm%2Fu14vDDM9A2kgrOgpjvgeB0%2Fimg.png" alt="?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FdcC6a2%2FbtqObXnvFMm%2Fu14vDDM9A2kgrOgpjvgeB0%2Fimg" style="zoom:50%;" />
+
+- 실제로 푸시를 보내고 싶을때
+
+  <img src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Ft0lKD%2FbtqN8ZGaHOj%2FkVnWM8bb6AKXHtrJIOWhXK%2Fimg.png" alt="?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Ft0lKD%2FbtqN8ZGaHOj%2FkVnWM8bb6AKXHtrJIOWhXK%2Fimg" style="zoom:50%;" />
+
+
+
+- 참고자료
+  - https://firebase.google.com/docs/cloud-messaging?hl=ko
+  - https://babbab2.tistory.com/58
+
