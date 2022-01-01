@@ -1,4 +1,4 @@
-# FCM & APNs
+# FCM
 
 ## 소개
 
@@ -192,29 +192,91 @@
        }
       ```
 
-    - 
+- 전송 옵션
 
+  - 비축소형 메시지와 축소형 메시지
 
+    - 비축소형 메시지
+  
+      - 각각의 개별 메시지가 기기로 전송됨
+      - 메시지마다 콘텐츠가 다르기 때문에 모든 메시지가 의미가 있음
+      - 예 : 채팅 메시지, 중요한 메시지
+  
+    - 축소형 메시지
+  
+      - 메시지가 아직 기기로 전송되지 않은 경우 새 메시지로 대체될 수 있음
+      - 최근 메시지만 의미가 있는 메시지
+      - 예 : 서버의 데이터와 동기화할 것을 알리는 데 사용되는 메시지, 스포츠 앱에서의 최신 득점 점수
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    - |          | 사용 시나리오                                                | 전송 방법                                                    |
+      | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+      | 비축소형 | 모든 메시지가 앱에서 중요해서 모두 전송되어야 할때           | 알림 메시지를 제외한 모든 메시지가 기본적으로 비축소형       |
+      | 축소형   | - 가장 최근 메시지만 의미가 있어서 이전 메시지를 대체해도 될때<br />- 비축소형 메시지를 굳이 사용할 필요가 없을 때 성능 면에 있어서는 축소형 메시지가 좋으나 토큰 당 축소 키 개수 제한이 있음 | 메시지 요청에 적절한 매개변수를 설정해야 함<br />- Android: `collapseKey`<br />- Apple: `apns-collapse-id`<br />- 웹: `Topic`<br />- 기존 프로토콜(모든 플랫폼): `collapse_key`<br /><br /><br />기본적으로 축소 키는 Firebase Console에 등록된 앱 패키지 이름이다 |
+  
+  - 메시지 우선순위 설정
+  
+    - Android의 다운스트림 메시지에 2가지 전송 우선순위를 할당할 수 있음
+  
+      1. 보통 우선순위
+         - 데이터 메시지의 기본 우선순위
+         - 앱이 포그라운스 상태면 즉시 전송됨
+         - 기기가 잠자기 상태면 전송이 지연될 수 있음 (배터리를 절약하기 위함)
+         - 예 : 시간이 크게 중요하지 않은 메시지 (새로운 이메일, UI 동기화 유지, 백그라운드 앱 데이터 동기화 등)
+         - 주의 : Apple 기기로 데이터 메시지를 전송할 때 우선순위를 5 또는 보통 우선순위로 설정해야 한다 (그렇지 않으면 `INVALID_ARGUMENT` 오류 발생)
+      2. 높은 우선순위
+         - 즉시 전송하려고 시도하며 필요한 경우 FCM에서 기기의 절전 모드를 해제하고 제한된 작업을 할 수 있음
+         - 사용자가 알림에 반응하게 해야 한다. 그렇지 않음이 감지된다면 우선순위가 낮아질 수 있다
+  
+    - ```json
+      // 예시
+      // 상황 : 잡지 구독자에게 새 콘텐츠를 다운로드할 수 있다고 알림을 보내는 상황
+      // 우선순위 : 보통 우선순위
+      // 프로토콜 : FCM HTTP v1 프로토콜
+      
+      {
+        "message":{
+          "topic":"subscriber-updates",
+          "notification":{
+            "body" : "This week's edition is now available.",
+            "title" : "NewsMagazine.com",
+          },
+          "data" : {
+            "volume" : "3.21.15",
+            "contents" : "http://www.news-magazine.com/world-week/21659772"
+          },
+          "android":{
+            "priority":"normal"
+          },
+          "apns":{
+            "headers":{
+              "apns-priority":"5"
+            }
+          },
+          "webpush": {
+            "headers": {
+              "Urgency": "high"
+            }
+          }
+        }
+      }
+      ```
+  
+    - 메시지 우선순위 설정에 관한 플랫폼별 세부정보 -> [APN 문서](https://developer.apple.com/library/prerelease/content/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/CommunicatingwithAPNs.html#//apple_ref/doc/uid/TP40008194-CH11-SW1), [잠자기 및 앱 대기 최적화](https://developer.android.com/training/monitoring-device-state/doze-standby.html?authuser=1)(Android), [웹 푸시 메시지 긴급성](https://tools.ietf.org/html/rfc8030#section-5.3)
+  
 
 ## 메시지 전송 이해
 
+- 메시지 전송 보고서
+- 알림 유입경로 분석
+- FCM Data API를 통해 집계된 전송 데이터
+- BigQuery 데이터 내보내기
+- 내보낸 데이터로 무엇을 할 수 있나요?
+
 ## FCM 등록 토큰 관리
+
+- 기본 모범 사례
+- 등록 토큰 신선도 보장
+- 배달 성공 측정
 
 # APNs
 
