@@ -263,6 +263,109 @@
   
     - 메시지 우선순위 설정에 관한 플랫폼별 세부정보 -> [APN 문서](https://developer.apple.com/library/prerelease/content/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/CommunicatingwithAPNs.html#//apple_ref/doc/uid/TP40008194-CH11-SW1), [잠자기 및 앱 대기 최적화](https://developer.android.com/training/monitoring-device-state/doze-standby.html?authuser=1)(Android), [웹 푸시 메시지 긴급성](https://tools.ietf.org/html/rfc8030#section-5.3)
   
+  - 메시지 수명 설정
+  
+    - FCM에서 바로 전송하지 못하는 경우가 있다 (기기가 꺼져 있는경우, 오프라인인 경우, 앱이 과도한 리소스를 소비하는것을 방지 등)
+  
+    - 이런 상황에서 FCM은 전송할 수 있게 되면 바로 전송한다. 하지만 뒤늦게 보내면 의미없는 경우도 있다
+  
+    - 그래서 메시지의 최대 수명을 지정할 수 있다
+  
+    - 범위 (단위 : 초) : 0 ~ 2,419,200 (28일)
+  
+      - Android, 웹, 자바스크립트에서 사용
+      - 지정하지 않을때 : 2,419,200 (28일)
+      - 0으로 지정할때 : 즉시 전송할 수 없는 메시지는 삭제됨 (즉시 전송 or 전송하지 않음)
+      - n으로 지정할때 : FCM은 최대 n초동안 메시지를 저장하여 전송 시도한다
+  
+    - ```json
+      {
+        "message":{
+          "token":"bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...",
+          "data":{
+            "Nick" : "Mario",
+            "body" : "great match!",
+            "Room" : "PortugalVSDenmark"
+          },
+          "apns":{
+            "headers":{
+              "apns-expiration":"1604750400"
+            }
+          },
+          "android":{
+            "ttl":"4500s"
+          },
+          "webpush":{
+            "headers":{
+              "TTL":"4500"
+            }
+          }
+        }
+      }
+      ```
+  
+- 여러 발신자의 메시지 수신
+
+  - 여러 발신자가 동일한 클라이언트 앱으로 메시지를 보낼 수 있음
+  - 이 기능을 사용하려면 각 발신자의 [발신자 ID](https://firebase.google.com/docs/cloud-messaging/concept-options?authuser=1#senderid)가 있어야 함
+  - 토큰 요청 하나에 여러 발신자 ID를 추가하지 않아야 함
+  - 등록 토큰을 발신자와 공유함
+
+- 메시지의 수명
+
+  - 메시지를 게시한 후 메시지 ID를 반환받음 != 기기로 전송됨
+  - 메시지를 게시한 후 메시지 ID를 반환받음 == 전송이 수락되었음
+  - 기기가 연결되어 있지만 잠자기 상태인 경우 우선순위가 낮은 메시지는 잠자기 상태가 해제될 때까지 FCM이 보관함
+  -  `collapse_key` 플래그가 이전 메시지를 축소할지, 새로운 메시지도 저장할 지 결정함
+  - 앱이 제거된 경우 : FCM이 메시지를 즉시 삭제하고 등록 토큰을 무효화함. 이후 이 기기로 메시지를 보내려고 시도하면 `NotRegistered` 오류가 발생함.
+
+- 제한 및 확장
+
+  - 축소형 메시지 제한
+    - 개발자가 앱에 동일한 메시지를 너무 자주 반복하는 경우에는 배터리에 미치는 영향을 줄이기 위해 메시지 전송을 지연(제한)함
+    - 축소형 메시지를 기기 하나당 앱별로 메시지 20개로 제한하고 3분마다 메시지 1개를 다시 채움
+
+  - XMPP 서버 제한
+    - FCM XMPP 서버에 연결할 수 있는 속도를 프로젝트당 1분에 400개의 연결로 제한
+    - 프로젝트마다 FCM에서 동시 연결 2,500개를 허용
+
+  - 단일 기기에 대한 최대 메시지 속도 : 분당 240개, 시간당 5,000개
+  - 업스트림 메시지 한도 : 프로젝트당 1,500,000/분, 기기당 업스트림 메시지를 1,000/분
+  - 토픽 메시지 한도 : 토픽 구독 추가/삭제 속도는 프로젝트당 3,000QPS
+  - 팬아웃 제한
+    - 프로젝트당 동시 메시지 팬아웃 수는 1,000개
+
+- FCM 포트 및 방화벽
+
+  - 조직에 인터넷 트래픽 송수신을 제한하는 방화벽이 있으면 모바일 기기의 FCM 연결을 허용하도록 구성해야 네트워크의 기기에서 메시지를 수신할 수 있음
+  - FCM은 대개 포트 5228을 사용하지만 443, 5229, 5230을 사용하는 경우도 있음
+
+- 사용자 인증 정보
+
+  - 구현한 FCM 기능에 따라 다음과 같은 Firebase 프로젝트의 사용자 인증 정보가 필요할 수도 있음
+  - 프로젝트 ID
+    - Firebase 프로젝트의 고유 식별자
+    - FCM v1 HTTP 엔드포인트에 관한 요청에 사용됨
+
+  - 등록 토큰
+    - 각 클라이언트 앱 인스턴스를 식별하는 고유한 토큰 문자열
+    - 단일 기기 및 기기 그룹 메시징에 필요함
+
+  - 발신자 ID
+    - Firebase 프로젝트를 만들 때 생성되는 고유한 숫자 값
+    - Firebase Console [설정](https://console.firebase.google.com/project/_/settings/cloudmessaging/?authuser=1) 창의 클라우드 메시징 탭에서 확인할 수 있음
+    - 발신자 ID는 클라이언트 앱에 메시지를 보낼 수 있는 각 발신자를 식별하는 데 사용됨
+
+  - 액세스 토큰
+    - HTTP v1 API에 대한 요청을 승인하는 단기 OAuth 2.0 토큰
+    - 이 토큰이 Firebase 프로젝트에 속한 서비스 계정에 연결됨
+    - 액세스 토큰을 만들고 순환하려면 -> [보내기 요청 승인](https://firebase.google.com/docs/cloud-messaging/auth-server?authuser=1)
+
+  - 서버 키 (이전 프로토콜용)
+    - 앱 서버가 Firebase 클라우드 메시징 이전 프로토콜을 통한 메시지 전송과 같은 Google 서비스에 액세스할 수 있도록 인증하는 서버 키
+    - Firebase 프로젝트를 만들 때 서버 키를 부여받음. -> Firebase Console [설정](https://console.firebase.google.com/project/_/settings/cloudmessaging/?authuser=1) 창의 클라우드 메시징 탭에서 확인 가능
+    - 중요 : 클라이언트 코드에 서버 키를 포함하면 안됨. 또한 앱 서버를 인증할 때 서버 키만 사용해야 함. Android, Apple 플랫폼, 브라우저 키는 FCM에서 거부함
+
 
 ## 메시지 전송 이해
 
