@@ -792,6 +792,44 @@
   - 조인은 NL조인 위주로 처리한다
   - Order by 절이 있어도 소트 연산을 생략할 수 있도록 인덱스를 구성해준다
 
+- 인덱스를 잘 구성하면 min, max를 구할때 전체 데이터를 읽지 않을 수 있다
+
+  - 조건절 컬럼과 min, max함수 인자 컬럼이 모두 인덱스에 포함돼 있어야 한다
+
+  - 예
+
+    ```sql
+    create index IDX_X1 on TABLE_NAME(a, b, c);
+    
+    select max(c) 
+    from TABLE_NAME 
+    where a = 30 
+    and b = 70;
+    -- a, b 두 조건을 만족하는 레코드 중 가장 오른쪽 레코드를 읽는다
+    ```
+
+    ```sql
+    create index IDX_X1 on TABLE_NAME(a, b, c);
+    
+    select max(b) 
+    from TABLE_NAME 
+    where a = 30 
+    and c = 70;
+    -- a 조건을 만족하는 레코드 중 오른쪽부터 스캔하면서 c조건에 맞는 레코드를 찾으면 멈춘다
+    ```
+
+    ```sql
+    create index IDX_X1 on TABLE_NAME(a, b, c);
+    
+    select max(a) 
+    from TABLE_NAME 
+    where b = 30 
+    and c = 70;
+    -- 전체 레코드 중 오른쪽부터 스캔하면서 b, c조건에 맞는 레코드를 찾으면 멈춘다
+    ```
+
+- 인덱스 선두 컬럼을 group by절에 사용한다면 sort group by 연산을 생략할 수 있다
+
 ### 5.4 Sort Area를 적게 사용하도록 SQL 작성
 
 <br/>
