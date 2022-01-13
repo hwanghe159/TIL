@@ -63,7 +63,31 @@
      - 부수적인 요소들(게터, 세터, 생성자 파라미터를 필드에 대입하기 위한 로직 등)을 묵시적으로 제공한다
 
   3. 안전성
+
+     - JVM에서 실행되기 때문에 메모리 안정성을 보장하고, 버퍼 오버플로를 방지하고, 동적으로 할당된 메모리를 잘못 사용함으로써 발생하는 문제들을 방지할 수 있다
+
+     - 정적 타입 지정 언어이므로 타입 안정성을 보장한다
+
+     - 컴파일 시점 검사를 통해 오류를 방지해준다
+
+     - `?`으로 `NullPointerException`을 방지해준다
+
+     - 타입 검사와 캐스트가 한 연산자에 의해 이루어지므로 `ClassCastException`을 방지해준다
+
+       ```java
+       // java
+       if (value instanceof String) {
+         System.out.println(((String) value).toUpperCase());
+       }
+       
+       // kotlin
+       if (value is String)
+         println(value.toUpperCase())
+       ```
+
   4. 상호운용성
+
+     - 기존 자바 API를 그대로 사용할 수 있다
 
 - 코틀린 도구 사용
 
