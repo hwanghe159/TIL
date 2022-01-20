@@ -139,6 +139,35 @@
 
 ## 2장. 코틀린 기초
 
+### 기본 요소: 함수와 변수
+
+- Hello, World!
+
+  ```kotlin
+  fun main(args: Array<String>) {
+    println("Hello, world!")
+  }
+  ```
+
+  - 함수를 선언할땐 `fun` 키워드
+  - 파라미터 이름(`args`) 뒤에 파라미터 타입(`Array<String>`)을 쓴다
+  - 함수를 꼭 클래스 안에 넣어야 할 필요가 없다
+  - 코틀린 표준 라이브러리는 자바 표준 라이브러리를 간결하게 사용할 수 있도록 감싼 래퍼를 제공한다 (`println`도 그런 함수중 하나)
+  - 세미콜론을 붙이지 않아도 된다
+
+- 함수
+
+  - 코틀린 함수의 기본 구조
+
+    <img src="../images/kotlin-function.png" alt="kotlin-function" style="zoom:70%;" />
+
+  - 코틀린의 if는 값을 만들어내지 못하는 문(statement)이 아니고 결과를 만드는 식(expression)이다
+
+  - 위처럼 중괄호로 둘러싸인 함수를 **블록이 본문인 함수**라고 하고, 등호와 식으로 이뤄진 함수를 **식이 본문인 함수**라고 한다
+
+    - 예 : `fun max(a: Int, b: Int): Int = if (a > b) a else b`
+    - 식이 본문인 함수는 반환 타입을 생략할 수 있다 (타입 추론 덕분) -> `fun max(a: Int, b: Int) = if (a > b) a else b`
+
 <br/>
 
 ## 3장. 함수 정의와 호출
