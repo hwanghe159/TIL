@@ -168,6 +168,114 @@
     - 예 : `fun max(a: Int, b: Int): Int = if (a > b) a else b`
     - 식이 본문인 함수는 반환 타입을 생략할 수 있다 (타입 추론 덕분) -> `fun max(a: Int, b: Int) = if (a > b) a else b`
 
+- 변수
+
+  - ```kotlin
+    // 타입 생략 가능
+    val question = "삶, 우주, 그리고 모든 것에 대한 궁극적인 질문" // 타입은 String이 됨
+    val answer = 42 // 타입은 Int가 됨
+    val yearsToCompute = 7.5e6 // 타입은 Double이 됨
+    
+    // 타입 명시해도 됨
+    val answer: Int = 42
+    
+    // 초기화 하지 않고 변수를 선언하려면 타입을 반드시 지정해야 함 (타입추론을 해야 하기 때문)
+    val answer: Int
+    answer = 42
+    ```
+
+  - `val` VS `var`
+
+    - `val`
+
+      - 변경 불가능한 참조를 저장하는 변수
+
+      - value에서 따옴
+
+      - 자바의 `final`에 해당함
+
+      - 블록을 실행할 때 정확히 한번만 초기화되어야 하지만 초기화 문장이 한번만 실행됨을 컴파일러가 확인할 수 있다면 여러 값으로 초기화할 수 있다
+
+        ```kotlin
+        val message: String
+        if (isSuccess()) {
+          message = "Success"
+        }
+        else {
+          message = "Failed"
+        }
+        ```
+
+      - 참조 자체는 불변이지만 그 참조가 가리키는 객체의 내부 값을 변경될 수 있다
+
+        ```kotlin
+        val languages = arrayListOf("Java") // 불변 참조 선언
+        languages.add("Kotlin") // 불변 참조가 가리키는 객체 내부 변경 가능
+        ```
+
+    - `var`
+
+      - 변경 가능한 참조를 저장하는 변수
+
+      - variable에서 따옴
+
+      - 자바의 일반 변수에 해당함
+
+      - 값은 변경 가능하지만 타입은 고정된다
+
+        ```kotlin
+        var answer = 42
+        answer = "no answer" // "Error: type mismatch" 컴파일 오류 발생
+        ```
+
+    - 기본적으로 모든 변수를 `val`로 선언하고, 나중에 꼭 필요한 경우에만 `var`로 선언해야 함수형 코드에 가까워진다
+
+  - 문자열 템플릿
+
+    - ```kotlin
+      fun main(args: Array<String>) {
+        val name = if (args.size > 0) args[0] else "Kotlin"
+        println("Hello, $name!")
+      }
+      ```
+
+    - 변수를 문자열 안에 사용할 수 있다 (변수 앞에 `$`를 넣어야 함)
+
+    - 컴파일 시점에 각 식을 검사하기 때문에 존재하지 않는 변수를 사용하면 컴파일 오류가 발생한다
+
+    - `$`문자를 문자열에 넣고 싶다면 이스케이프 문자(`\`)를 사용해야 한다
+
+      ```kotlin
+      val price = 1000
+      println("총 가격은 $price\$") //총 가격은 1000$
+      ```
+
+    - 변수 이름만 넣을 수 있는 게 아니라 중괄호로 둘러싸서 식을 넣을 수도 있다
+
+      ```kotlin
+      fun main(args: Array<String>) {
+        if (args.size > 0) {
+          println("Hello, ${args[0]}!")
+        }
+      }
+      ```
+
+    - 중괄호로 둘러싼 식 안에서 큰따옴표를 사용할 수 있다
+
+      ```kotlin
+      fun main(args: Array<String>) {
+        println("Hello, ${if (args.size > 0) args[0] else "someone"}!") // 입력 없을땐 -> Hello, someone!
+      }
+      ```
+
+    - 주의점 : 변수명 바로 뒤에 한글을 붙여 사용하면 오류가 발생한다
+
+      ```kotlin
+      val name = "준호"
+      println("$name님 반가워요") // Unresolved reference: name님
+      println("${name}님 반가워요") // 중괄호로 감싸는 게 검색할때나 일괄 변경할때, 그리고 가독성 측면에도 좋다
+      ```
+
 <br/>
 
 ## 3장. 함수 정의와 호출
