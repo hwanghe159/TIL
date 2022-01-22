@@ -276,6 +276,95 @@
       println("${name}님 반가워요") // 중괄호로 감싸는 게 검색할때나 일괄 변경할때, 그리고 가독성 측면에도 좋다
       ```
 
+### 클래스와 프로퍼티
+
+- 자바-코틀린 변환기로 VO 변환하기
+
+  - ```kotlin
+    // java
+    public class Person {
+      private final String name;
+      
+      public Person(String name) {
+        this.name = name;
+      }
+      
+      public String getName() {
+        return name;
+      }
+    }
+    
+    //kotlin
+    class Person(val name: String)
+    ```
+
+  - 코틀린은 기본이 public 이므로 생략 가능하다
+
+- 프로퍼티
+
+  - 자바에서는 필드와 접근자를 묶어 프로퍼티라고 부른다
+
+  - 코틀린 프로퍼티는 자바의 필드와 접근자를 완전히 대신한다
+
+  - ```kotlin
+    class Person (
+      val name: String, // 읽기전용 프로퍼티는 val로 선언한다. 비공개필드, 게터를 만들어낸다
+      var isMarried: Boolean // 쓰기가능 프로퍼티는 var로 선언한다. 비공개필드, 게터, 세터를 만들어낸다
+    )
+    ```
+
+  - 위 코드를 자바, 코틀린에서 사용하기
+
+    ```java
+    // java
+    Person person = new Person("Bob", true);
+    System.out.println(person.getName()); // 자동으로 게터를 만들어줌
+    System.out.println(person.isMarried()); // is로 시작하는 프로퍼티의 게터는 이름 그래도 사용한다
+    person.setMarried(false); // is로 시작하는 프로퍼티의 세터는 is를 set으로 바꾼 이름을 사용한다
+    ```
+
+    ```kotlin
+    // kotlin
+    val person = Person("Bob", true); // new 키워드가 필요없다
+    println(person.name); // 프로퍼티 이름을 직접 사용해도 자동으로 게터를 호출한다
+    println(person.isMarried);
+    person.isMarried = false // 자동으로 세터를 호출한다
+    ```
+
+- 프로퍼티의 접근자를 직접 작성하면 별도의 필드를 만들 필요 없다
+
+  ```kotlin
+  class Rectangle(val height: Int, val width: Int) {
+    val isSquare: Boolean
+      get() {
+        return height == width
+      }
+  }
+  
+  // or
+  
+  class Rectangle(val height: Int, val width: Int) {
+    val isSquare: Boolean
+      get() = height == width
+  }
+  ```
+
+  ```kotlin
+  val rectangle = Rectangle(41, 43)
+  println(rectangle.isSquare) // false
+  ```
+
+- 디렉터리와 패키지
+
+  - `package`
+    - 그 파일안에 있는 모든 선언이 해당 패키지에 들어간다
+    - 같은 패키지라면 다른 파일에서 정의한 선언도 사용할 수 있다
+  - `import`
+    - 다른 패키지에서 정의한 선언을 사용하려면 사용한다
+    - 패키지 이름 뒤에 `.*` 를 추가하면 패키지 안의 모든 선언을 임포트할 수 있다 (단, 최상위 함수나 프로퍼티까지 모두 불러온다)
+  - 자바에선 패키지 구조와 디렉터리 구조를 일치시켜야 하지만 코틀린에선 일치시키지 않아도 된다.
+    - 하지만 자바처럼 구조를 일치시키는 게 좋다
+
 <br/>
 
 ## 3장. 함수 정의와 호출
