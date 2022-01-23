@@ -365,6 +365,63 @@
   - 자바에선 패키지 구조와 디렉터리 구조를 일치시켜야 하지만 코틀린에선 일치시키지 않아도 된다.
     - 하지만 자바처럼 구조를 일치시키는 게 좋다
 
+### 선택 표현과 처리: enum과 when
+
+- enum과 when 예제
+
+  ```kotlin
+  enum class Color( // enum은 소프트키워드(변수 이름으로 사용가능), class는 키워드(변수 이름으로 사용불가)
+    val r: Int, val g: Int, val b: Int
+  ) {
+    RED(255, 0, 0),
+    ORANGE(255, 165, 0),
+    YELLOW(255, 255, 0), 
+    GREEN(0, 255, 0), 
+    BLUE(0, 0, 255),
+    INDIGO(75, 0, 130), 
+    VIOLET(238, 130, 238); // 상수 목록과 메소드 사이엔 세미콜론 필수
+  
+    fun rgb() = (r * 256 + g) * 256 + b
+  }
+  ```
+
+  ```kotlin
+  // when으로 자바의 switch를 대체
+  fun getWarmth(color: Color) = when(color) {
+    RED, ORANGE, YELLOW -> "warm"
+    GREEN -> "neutral"
+    BLUE, INDIGO, VIOLET -> "cold"
+  }
+  ```
+
+- when에 임의의 객체를 사용할 수 있다
+
+  ```kotlin
+  fun mix(c1: Color, c2: Color) =
+    when (setOf(c1, c2)) { // when의 인자로 동등성(equility) 검사를 한다
+      setOf(RED, YELLOW) -> ORANGE
+      setOf(YELLOW, BLUE) -> GREEN
+      setOf(BLUE, VIOLET) -> INDIGO
+      else -> throw Exception("Dirty color")
+    }
+  
+  // 아래는 위의 코드에서 when의 인자를 없애서 최적화한 코드. 단 가독성은 떨어짐
+  
+  fun mix(c1: Color, c2: Color) =
+    when {
+      (c1 == RED && c2 == YELLOW) || (c1 == YELLOW && c2 == RED) -> ORANGE
+      (c1 == YELLOW && c2 == BLUE) || (c1 == BLUE && c2 == YELLOW) -> GREEN
+      (c1 == BLUE && c2 == VIOLET) || (c1 == VIOLET && c2 == BLUE) -> INDIGO
+      else -> throw Exception("Dirty color")
+    }
+  ```
+
+  
+
+### 대상을 이터레이션: while과 for 루프
+
+### 코틀린의 예외 처리
+
 <br/>
 
 ## 3장. 함수 정의와 호출
