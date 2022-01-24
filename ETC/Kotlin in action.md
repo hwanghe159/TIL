@@ -416,11 +416,149 @@
     }
   ```
 
+- 스마트 캐스트 : `is`를 사용해서 변수타입 검사 + 캐스팅을 한꺼번에 하는 것
+
+  - ```kotlin
+    if (e is Sum) {
+      return eval(e.right) + eval(e.left)
+    }
+    ```
+  
+  - 단, `Sum` 클래스의 `right`, `left` 프로퍼티는 반드시 `val`이어야 하고, 커스텀 접근자여서도 안된다 (항상 같은 값을 내놓는다고 확신할 수 없기 때문)
+  
+- if 대신 when으로 변경
+
+  - ```kotlin
+    // if 사용
+    fun eval(e: Expr): Int =
+      if (e is Num) e.value 
+      else if (e is Sum) eval(e.right) + eval(e.left)
+      else throw IllegalAccessException("Unknown expression")
+    
+    // when 사용
+    fun eval(e: Expr): Int =
+      when (e) {
+        is Num -> e.value
+        is Sum -> eval(e.right) + eval(e.left)
+        else -> throw IllegalAccessException("Unknown expression")
+      }
+    
+    // 블록 사용 가능
+    fun eval(e: Expr): Int =
+      when (e) {
+        is Num -> {
+          println("num: ${e.value}")
+          e.value // 마지막 문장인 이 문장이 블록의 결과
+        }
+        is Sum -> {
+          val left = eval(e.left)
+          val right = eval(e.right)
+          println("sum: $left + $right")
+          left + right // 마지막 문장인 이 문장이 블록의 결과
+        }
+        else -> throw IllegalAccessException("Unknown expression")
+      }
+    ```
+  
+    - if, when 모두 분기에 블록을 사용한다면, 마지막 문장이 블록의 결과가 된다
+    - 블록의 마지막 식이 블록의 결과라는 규칙은 블록이 값을 만들어내야 하는 경우 항상 성립한다 (단, 블록이 본문인 함수는 return문이 항상 있어야 한다)
   
 
 ### 대상을 이터레이션: while과 for 루프
 
+- while문
+
+  - ```kotlin
+    // java와 동일
+    while (조건) {
+      ...
+    }
+    
+    do {
+      ...
+    } while (조건)
+    ```
+
+- for문: 수에 대한 이터레이션
+
+  - ```kotlin
+    for (i in 1..100) { // 1, 2, 3, ..., 99, 100
+      ...
+    }
+    
+    for (i in 100 downTo 1 step 2) { // 100, 98, 96, ..., 4, 2
+      ...
+    }
+    
+    for (i in 0 until 100) { // 0, 1, 2, ..., 98, 99
+      ...
+    }
+    ```
+
+- for문: 맵에 대한 이터레이션
+
+  - ```kotlin
+    val binaryReps = TreeMap<Char, String>()
+    for (c in 'A'..'F') { // 숫자뿐만 아니라 문자에도 ..연산자를 사용할 수 있다
+      val binary = Integer.toBinaryString(c.toInt())
+      binaryReps[c] = binary
+    }
+    for ((letter, binary) in binaryReps) { // (letter, binary)은 키/값 쌍
+      println("$letter = $binary")
+    }
+    // A = 1000001
+    // B = 1000010
+    // C = 1000011
+    // D = 1000100
+    // E = 1000101
+    // F = 1000110
+    ```
+
+- in으로 원소 검사
+
+  - ```kotlin
+    // in, !in
+    fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z'
+    fun isNotDigit(c: Char) = c !in '0'..'9'
+    
+    // Comparable을 구현하고 있으면 범위를 만들 수 있다.
+    // ("Kotlin" >= "Java" && "Kotlin" <= "Scala") 와 같음
+    println("Kotlin" in "Java".."Scala")
+    
+    // 컬렉션에서도 in 사용 가능
+    println("Kotlin" in setOf("Java", "Scala"))
+    ```
+
 ### 코틀린의 예외 처리
+
+- ```kotlin
+  fun readNumber(reader: BufferedReader): Int? {
+    try {
+      val line = reader.readLine()
+      return Integer.parseInt(line)
+    } catch (e: NumberFormatException) {
+      return null
+    } finally {
+      reader.close()
+    }
+  }
+  ```
+
+  - 자바에서는 체크예외를 throws로 명시적으로 처리해야 한다
+  - 하지만 코틀린은 체크예외와 언체크예외를 구별하지 않아서 발생한 예외를 잡아내지 않아도 된다
+
+- try를 식으로 사용하기
+
+  - ```kotlin
+    fun readNumber(reader: BufferedReader): Int? {
+      return try {
+        val line = reader.readLine()
+        Integer.parseInt(line)
+      } catch (e: NumberFormatException) {
+        null
+      }
+    }
+    ```
 
 <br/>
 
