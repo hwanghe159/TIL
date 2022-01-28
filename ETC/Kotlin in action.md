@@ -566,7 +566,7 @@
 
 ### 코틀린에서 컬렉션 만들기
 
-- 간단한 예시
+- 간단하게 컬렉션을 만들 수 있다
 
   ```kotlin
   val set = hashSetOf(1, 7, 53)
@@ -574,9 +574,36 @@
   val map = hashMapOf(1 to "one", 7 to "seven", 53 to "fifty-three") // to는 키워드가 아니라 일반 함수다
   ```
 
-- 
+- 자바에서 제공하지 않는 메서드를 사용할 수 있다
 
-### 함수를 호툴하기 쉽게 만들기
+  ```kotlin
+  val strings = listOf("first", "second", "fourteenth")
+  println(strings.last()) // "fourteenth"
+  
+  val numbers = setOf(1, 14, 2)
+  println(numbers.max()) // 14
+  ```
+
+### 함수를 호출하기 쉽게 만들기
+
+- 컬렉션의 toString 커스텀하기
+
+  ```kotlin
+  fun <T> joinToString(
+      collection: Collection<T>,
+      separator: String,
+      prefix: String,
+      postfix: String
+  ): String {
+      // 생략
+  }
+  
+  val list = listOf(1, 2, 3)
+  println(joinToString(list, "; ", "(", ")")) // (1; 2; 3)
+  println(joinToString(list, separator = "; ", prefix = "(", postfix = ")")) // 인자의 이름을 명시해서 가독성을 높일 수 있다
+  ```
+
+  
 
 ### 메서드를 다른 클래스에 추가: 확장 함수와 확장 프로퍼티
 
