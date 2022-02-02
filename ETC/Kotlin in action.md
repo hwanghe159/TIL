@@ -586,7 +586,7 @@
 
 ### 함수를 호출하기 쉽게 만들기
 
-- 컬렉션의 toString 커스텀하기
+- 컬렉션의 `toString` 커스텀하기
 
   ```kotlin
   fun <T> joinToString(
@@ -600,7 +600,25 @@
   
   val list = listOf(1, 2, 3)
   println(joinToString(list, "; ", "(", ")")) // (1; 2; 3)
-  println(joinToString(list, separator = "; ", prefix = "(", postfix = ")")) // 인자의 이름을 명시해서 가독성을 높일 수 있다
+  println(joinToString(list, separator = "; ", prefix = "(", postfix = ")")) // 인자의 이름을 명시해서 가독성을 높일 수 있다. 단, 자바 메서드라면 이름 붙인 인자를 사용할 수 없다
+  ```
+
+- 디폴트 마라미터 값을 지정할 수 있다
+
+  ```kotlin
+  fun <T> joinToString(
+      collection: Collection<T>,
+      separator: String = ", ",
+      prefix: String = "",
+      postfix: String = ""
+  ): String {
+      // 생략
+  }
+  
+  println(joinToString(list, ", ", "", ""))	// 1, 2, 3
+  println(joinToString(list)) // 1, 2, 3
+  println(joinToString(list, "; ")) // 1; 2; 3
+  println(joinToString(list, postfix = ";", prefix = "# ")) // # 1, 2, 3; (파라미터 순서를 지킬 필요 없다)
   ```
 
   
