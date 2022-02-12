@@ -621,6 +621,25 @@
   println(joinToString(list, postfix = ";", prefix = "# ")) // # 1, 2, 3; (파라미터 순서를 지킬 필요 없다)
   ```
 
+  - 단, 자바에서 디폴트 파라미터가 적용된 코틀린 함수를 호출할때에는 모든 인자를 제공해야 한다
+  - 그러기 싫다면 `@JvmOverloads`를 적용하면 된다
+  
+- 최상위 함수와 프로퍼티
+
+  - ```kotlin
+    // join.kt
+    package strings
+    fun joinToString( ... ): String { ... } // 함수를 최상위 함수로 선언
+    
+    // join.kt를 변환한 java 코드
+    package strings;
+    
+    public class JoinKt {
+      public static String joinToString( ... ) { ... }
+    }
+    ```
+  
+  - 클래스 이름을 `JoinKt`가 아닌 `StringFunctions`로 바꾸고 싶다면 `@file:JvmName("StringFunctions")`을 사용한다
   
 
 ### 메서드를 다른 클래스에 추가: 확장 함수와 확장 프로퍼티
