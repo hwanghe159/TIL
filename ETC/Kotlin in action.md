@@ -624,7 +624,7 @@
   - 단, 자바에서 디폴트 파라미터가 적용된 코틀린 함수를 호출할때에는 모든 인자를 제공해야 한다
   - 그러기 싫다면 `@JvmOverloads`를 적용하면 된다
   
-- 최상위 함수와 프로퍼티
+- 최상위 함수
 
   - ```kotlin
     // join.kt
@@ -641,8 +641,95 @@
   
   - 클래스 이름을 `JoinKt`가 아닌 `StringFunctions`로 바꾸고 싶다면 `@file:JvmName("StringFunctions")`을 사용한다
   
+- 최상위 프로퍼티
+
+  - 함수와 마찬가지로 프로퍼티도 최상위 수준에 놓을 수 있다
+  
+  - ```kotlin
+    var opCount = 0 // 연산을 수행한 횟수
+    
+    fun performOperation() {
+      opCount++
+    }
+    ```
+  
+  - `val`로 선언하면 게터, `var`로 선언하면 게터, 세터가 생긴다
+  
+  - `public static final` 필드로 컴파일하게 하려면 const 변경자를 추가하면 된다
+  
+    - `const val UNIX_SEPARATOR = "\n"`
+  
 
 ### 메서드를 다른 클래스에 추가: 확장 함수와 확장 프로퍼티
+
+- 확장 함수
+
+  - 어떤 클래스의 외부에 선언됐지만 멤버 메소드인것처럼 호출할 수 있다
+
+  - ```kotlin
+    package strings
+    
+    // String은 수신 객체 타입, this는 수신 객체
+    fun String.lastChar() : Char = this.get(this.length - 1) // this는 생략 가능
+    ```
+
+    ```kotlin
+    import strings.lastChar // 개별 함수 임포트 가능
+    import strings.* // *을 사용해서 임포트 가능
+    import strings.lastChar as last // 함수 이름 변경 가능
+    
+    val c = "Kotlin".lastChar()
+    ...
+    ```
+
+  - `joinToString()`을 확장함수로 정의하기
+
+    - ```kotlin
+      // AS-IS
+      fun <T> joinToString(
+          collection: Collection<T>,
+          separator: String = ", ",
+          prefix: String = "",
+          postfix: String = ""
+      ): String {
+          val result = StringBuilder(prefix)
+          for ((index, element) in collection.withIndex()) {
+              if (index > 0) {
+                  result.append(separator)
+              }
+              result.append(element)
+          }
+          result.append(postfix)
+          return result.toString()
+      }
+      
+      val list = listOf(1, 2, 3)
+      joinToString(list, separator = "; ", prefix = "(", postfix = ")") // (1; 2; 3)
+      ```
+
+      ```kotlin
+      // TO-BE
+      fun <T> Collection<T>.joinToString(
+          separator: String = ", ",
+          prefix: String = "",
+          postfix: String = ""
+      ): String {
+          val result = StringBuilder(prefix)
+          for ((index, element) in this.withIndex()) {
+              if (index > 0) {
+                  result.append(separator)
+              }
+              result.append(element)
+          }
+          result.append(postfix)
+          return result.toString()
+      }
+      
+      val list = listOf(1, 2, 3)
+      list.joinToString(separator = "; ", prefix = "(", postfix = ")") // (1; 2; 3)
+      ```
+
+      
 
 ### 컬렉션 처리: 가변 길이 인자, 중위 함수 호출, 라이브러리 지원
 
