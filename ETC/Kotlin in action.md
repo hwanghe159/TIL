@@ -729,9 +729,67 @@
       list.joinToString(separator = "; ", prefix = "(", postfix = ")") // (1; 2; 3)
       ```
 
-      
+- 단, 확장함수는 오버라이드 할 수 없다
+
+  - 확장함수는 클래스의 일부가 아니기 때문
+
+    ```kotlin
+    open class View {
+        open fun click() = println("View clicked")
+    }
+    
+    class Button: View() {
+        override fun click() = println("Button clicked")
+    }
+    
+    fun View.showOff() = println("I'm a view!") // 확장함수
+    fun Button.showOff() = println("I'm a button!") // 확장함수
+    
+    val view1: View = Button()
+    view1.click() // Button clicked
+    view1.showOff() // I'm a view!
+    val view2 = View()
+    view2.click() // View clicked
+    view2.showOff() // I'm a view!
+    ```
+  
+- 확장 프로퍼티
+
+  - ```kotlin
+    var StringBuilder.lastChar: Char // StringBuilder에 lastChar 확장 프로퍼티 선언
+        get() = get(length - 1)
+        set(value: Char) {
+            this.setCharAt(length - 1, value)
+        }
+    
+    val sb = StringBuilder("Kotlin?")
+    println(sb.lastChar) // "?"
+    sb.lastChar = '!'
+    println(sb) // Kotlin!
+    ```
+  
 
 ### 컬렉션 처리: 가변 길이 인자, 중위 함수 호출, 라이브러리 지원
+
+- 가변 인자 함수
+
+  - 가변 인자를 받는 함수를 정의하려면 `vararg` 변경자를 추가하면 된다
+
+  - ```kotlin
+    fun listOf<T>(vararg values: T): List<T> { ... }
+    
+    val list = listOf(1, 2, 3, 4)
+    ```
+
+  - 배열에 들어있는 원소를 가변 길이 인자로 넘길때 스프레드 연산자(`*`)를 이용한다
+
+  - ```kotlin
+    val array = arrayOf(4, 5, 6, 7)
+    val listOf = listOf(1, 2, 3, *array)
+    println(listOf) // [1, 2, 3, 4, 5, 6, 7]
+    ```
+
+- 중위
 
 ### 문자열과 정규식 다루기
 
