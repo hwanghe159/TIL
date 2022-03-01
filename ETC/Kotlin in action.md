@@ -789,11 +789,116 @@
     println(listOf) // [1, 2, 3, 4, 5, 6, 7]
     ```
 
-- 중위
+- 중위 호출
+
+  - ```kotlin
+    val map = mapOf(1 to "one", 7 to "seven", 53 to "fifty-three")
+    ```
+
+  - 위 코드에서 `to`는 코틀린 키워드가 아니고, 중위 호출이라는 특별한 방식으로 `to` 메서드를 호출한 것이다
+
+  - ```kotlin
+    // to 함수의 정의를 간략하게 나타낸 코드
+    infix fun Any.to(other: Any) = Pair(this, other)
+    ```
+
+    - `1.to("one")` 와 `1 to "one"`은 같다
+    - 중위 호출을 허용하게 하려면 infix 변경자를 추가해야 한다
+
+  
 
 ### 문자열과 정규식 다루기
 
-### 코드 다듬기: 로컬 함수와 확장
+- 코틀린에서는 자바와 달리 split 메서드에서 String 타입이 아닌 Regex 타입을 받기 때문에 혼동이 적다
+
+  ```kotlin
+  // java
+  "12.345-6.A".split("."); // split이 정규식을 받기 때문에 결과는 [12, 345-6, A]이 아니고 빈 배열이다
+  
+  // kotlin
+  "12.345-6.A".split("\\.|-".toRegex()) // [12, 345, 6, A]
+  ```
+
+- 삼중 따옴표로 편하게 정규식을 다룰 수 있다
+
+  ```kotlin
+  val path = "/Users/yole/kotlin-book/chapter.adoc"
+  val regex = """(.+)/(.+)\.(.+)""".toRegex() // 역슬래시를 포함한 어떤 문자도 이스케이프 할 필요 없음
+  val matchResult = regex.matchEntire(path) // [/Users/yole/kotlin-book, chapter, adoc]
+  ```
+
+### 로컬 함수와 확장으로 중복 코드 제거하기
+
+- ```kotlin
+  // User에 대한 필드 검증 후 저장하는 로직
+  
+  class User(val id: Int, val name: String, val address: String)
+  
+  fun saveUser(user: User) {
+      if (user.name.isEmpty()) {
+          throw IllegalArgumentException("Can't save user ${user.id}: empty Name")
+      }
+      if (user.address.isEmpty()) {
+          throw IllegalArgumentException("Can't save user ${user.id}: empty Address")
+      }
+      // 데이터베이스에 저장
+  }
+  ```
+
+- ```kotlin
+  // 로컬 함수로 중복 코드 제거
+  
+  class User(val id: Int, val name: String, val address: String)
+  
+  fun saveUser(user: User) {
+      fun validate(user: User, value: String, fieldName: String) {
+          if (value.isEmpty()) {
+              throw IllegalArgumentException("Can't save user ${user.id}: empty $fieldName")
+          }
+      }
+      validate(user, user.name, "Name")
+      validate(user, user.address, "Address")
+      // 데이터베이스에 저장
+  }
+  ```
+
+  ```kotlin
+  // 로컬 함수에선 바깥 함수의 파라미터에 접근할 수 있다. 불필요한 파라미터 제거
+  
+  class User(val id: Int, val name: String, val address: String)
+  
+  fun saveUser(user: User) {
+      fun validate(value: String, fieldName: String) {
+          if (value.isEmpty()) {
+              throw IllegalArgumentException("Can't save user ${user.id}: empty $fieldName")
+          }
+      }
+      validate(user.name, "Name")
+      validate(user.address, "Address")
+      // 데이터베이스에 저장
+  }
+  ```
+
+  ```kotlin
+  // 검증로직을 확장함수로
+  
+  class User(val id: Int, val name: String, val address: String)
+  
+  fun User.validateBeforeSave() {
+      fun validate(value: String, fieldName: String) {
+          if (value.isEmpty()) {
+              throw IllegalArgumentException("Can't save user $id: empty $fieldName")
+          }
+      }
+      validate(name, "Name")
+      validate(address, "Address")
+  }
+  
+  fun saveUser(user: User) {
+      user.validateBeforeSave()
+      // 데이터베이스에 저장
+  }
+  ```
 
 <br/>
 
