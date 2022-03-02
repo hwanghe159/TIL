@@ -85,7 +85,7 @@
 
   - `notification` 키 안에 사전 정의된 키 옵션 모음(`title`, `body` 등)으로 설정한다
 
-    - 사전 정의된 키 전체 목록 : [HTTP v1](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=1#Notification), [기존 HTTP](https://firebase.google.com/docs/cloud-messaging/http-server-ref?authuser=1#notification-payload-support), [XMPP](https://firebase.google.com/docs/cloud-messaging/xmpp-server-ref?authuser=1#notification-payload-support)
+    - 사전 정의된 키 전체 목록 : [HTTP v1](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?authuser=1#Notification), [기존 HTTP](https://firebase.google.com/docs/cloud-messaging/http-server-ref?authuser=1#notification-payload-support)(레거시), [XMPP](https://firebase.google.com/docs/cloud-messaging/xmpp-server-ref?authuser=1#notification-payload-support)(레거시)
 
   - 앱이 백그라운드 상태이면 알림 메시지가 알림 목록으로 전송된다
 
@@ -391,6 +391,55 @@
 - 기본 모범 사례
 - 등록 토큰 신선도 보장
 - 배달 성공 측정
+
+## 서버 환경
+
+- 보내기 요청 작성
+
+  - 특정 기기에 메시지 전송하기
+
+    ```java
+    // 이 등록 토큰은 클라이언트 FCM SDK에서 가져옴
+    String registrationToken = "YOUR_REGISTRATION_TOKEN";
+    
+    // https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages?hl=ko 참고
+    Message message = Message.builder()
+        .putData("score", "850")
+        .putData("time", "2:45")
+        .setToken(registrationToken)
+        .build();
+    
+    // 제공된 등록 토큰으로 메시지 전송
+    // 응답은 projects/{project_id}/messages/{message_id} 형식
+    String response = FirebaseMessaging.getInstance().send(message);
+    ```
+
+  - 여러 기기에 메시지 전송
+
+    ```java
+    // 등록 토큰은 최대 500개
+    List<String> registrationTokens = Arrays.asList(
+        "YOUR_REGISTRATION_TOKEN_1",
+        // ...
+        "YOUR_REGISTRATION_TOKEN_n"
+    );
+    
+    MulticastMessage message = MulticastMessage.builder()
+        .putData("score", "850")
+        .putData("time", "2:45")
+        .addAllTokens(registrationTokens)
+        .build();
+    
+    // 내부적으로 sendAll() 메서드 사용함
+    // BatchResponse.getResponses의 순서는 제공된 등록 토큰(registrationTokens) 순서 그대로임
+    BatchResponse response = FirebaseMessaging.getInstance().sendMulticast(message);
+    ```
+
+  - `sendMulticast()` vs `sendAll()`
+
+    - `sendMulticast()`는 `MulticastMessage` 타입을 받고 `sendAll()`은 `List<Message>`를 받음
+    - `sendMulticast()`는 내부적으로 `sendAll()` 사용함
+    - `sendAll()`은 각각의 메시지의 내용이 달라도 되는데 `sendMulticast()`은 메시지 내용이 같아야 하는듯?
 
 # APNs
 
