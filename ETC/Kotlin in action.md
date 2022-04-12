@@ -972,6 +972,118 @@
 
 ## 5장. 람다로 프로그래밍
 
+### 람다 식과 멤버 참조
+
+- 람다?
+
+  - 값처럼 여기저기 전달할 수 있는 동작의 모음
+
+  - <img src="/Users/hwangjunho/Documents/GitHub/TIL/images/kotlin_lambda.jpeg" alt="kotlin_lambda" style="zoom: 25%;" />
+
+  - 람다 식을 변수에 저장할 수 있음
+
+    ```kotlin
+    sum = { x: Int, y: Int -> x + y }
+    println(sum(1, 2)) // 3
+    ```
+
+  - 람다 활용 예제
+
+    ```kotlin
+    val people = listOf(Person("Alice", 29), Person ("Bob", 31))
+    // 코드를 줄여쓸 수 있는 기능을 안쓴 예. 타입은 유추 가능하므로 생략 가능하고 인자가 하나일땐 인자에 이름을 붙이지 않아도 된다
+    people.maxBy({ p: Person -> p.age })
+    // 함수 맨 뒤의 인자가 람다라면 괄호 밖으로 뺄 수 있다
+    people.maxBy() { p: Person -> p.age }
+    // 인자가 람다뿐이고 괄호뒤에 람다를 썼다면 괄호 생략 가능하다
+    people.maxBy { p: Person -> p.age }
+    // 람다 인자도 타입 추론 가능하다
+    people.maxBy { p -> p.age }
+    // 람다 인자가 하나뿐이고 타입을 추론할 수 있으면 it 바로 사용 가능
+    people.maxBy { it.age }
+    ```
+
+- 람다가 포획한 변수
+
+  - 람다 안에서 사용하는 외부 변수를 람다가 포획한 변수라고 한다
+  - 코틀린에서는 자바와는 달리 람다 내에서 람다 밖의 final이 아닌 변수에 접근할 수 있고, 변경할 수 있다
+
+- 멤버 참조
+
+  - `::`을 사용하는 식. 프로퍼티나 메소드를 단 하나만 호출하는 함수 값을 만들어준다
+
+    ```kotlin
+    // 람다 방식
+    people.maxBy { it.age }
+    // 멤버 참조 방식
+    people.maxBy(Person::age)
+    ```
+
+  - 최상위 함수나 최상위 프로퍼티 참조 가능
+
+    ```kotlin
+    fun sayHello() = println("Hello!")
+    run(::sayHello) // "Hello!"
+    ```
+
+### 컬렉션 함수형 API
+
+- `filter`, `map`
+
+  ```kotlin
+  val people = listOf(Person("Alice", 29), Person ("Bob", 31))
+  
+  // 30살 이상인 사람만
+  people.filter { it.age >= 30 }
+  // 이름의 리스트
+  people.map { it.name }
+  people.map(Person::name)
+  // 30 이상인 사람의 이름 리스트
+  people.filter { it.age >= 30 }.map(Person::name)
+  // 나이가 가장 많은 사람들의 리스트
+  val maxAge = people.maxBy(Person::age)!!.age
+  people.filter { it.age == maxAge }
+  ```
+
+- `all`, `any`, `count`, `find`
+
+  ```kotlin
+  val people = listOf(Person("Alice", 29), Person ("Bob", 31))
+  val over30 = { p: Person -> p.age > 30 }
+  
+  // 모두 30살 초과인지?
+  people.all(over30)
+  // 30살 초과가 한명이라도 있는지?
+  people.any(over30)
+  // 30살 초과 몇명?
+  people.count(over30)
+  // 30살 초과인 사람 한명만 찾기, 없으면 null
+  people.find(over30)
+  ```
+
+- `groupBy`
+
+  ```kotlin
+  // List<Person> -> Map<Int, List<Person>>
+  people.groupBy { it.age }
+  ```
+
+- `flatMap`, `flatten`
+
+  ```kotlin
+  val strings = listOf("abc", "def")
+  strings.flatMap { it.toList() } // [a, b, c, d, e, f]
+  
+  val numbers = listOf(listOf(1, 2), listOf(3, 4))
+  numbers.flatten() // [1, 2, 3, 4]
+  ```
+
+### 지연 계산(lazy) 컬렉션 연산
+
+### 자바 함수형 인터페이스 활용
+
+### 수신 객체 지정 람다: with과 apply
+
 <br/>
 
 ## 6장. 코틀린 타입 시스템
