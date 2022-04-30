@@ -1080,6 +1080,19 @@
 
 ### 지연 계산(lazy) 컬렉션 연산
 
+- 시퀀스를 사용하면 중간 임시 컬렉션을 만들지 않아 효율적이다
+
+  ```kotlin
+  // map의 결과를 담는 임시 컬렉션, filter의 결과를 담는 임시 컬렉션 두개가 생긴다
+  people.map(Person::name).filter { it.startsWith("A") }
+  
+  // 시퀀스를 이용하면 임시컬렉션을 만들지 않아 효율적이다
+  people.asSequence()
+  	.map(Person::name)
+  	.filter { it.startsWith("A") }
+  	.toList()
+  ```
+
 ### 자바 함수형 인터페이스 활용
 
 ### 수신 객체 지정 람다: with과 apply
@@ -1087,6 +1100,85 @@
 <br/>
 
 ## 6장. 코틀린 타입 시스템
+
+### 널 가능성
+
+- 코틀린과 자바의 가장 중요한 차이점은 코틀린 타입 시스템이 널이 될 수 있는 타입을 명시적으로 지원한다는 점이다.
+
+- ```kotlin
+  // java
+  int strLen(String s) { // s가 null이면 NPE 발생
+    return s.length();
+  }
+  
+  // kotlin
+  fun strLen(s: String) = s.length // s에 null이거나 nul이 될 수 있는 인자를 넘기면 컴파일 오류
+  fun strLen(s: String?) = s.length // s에 null 가능
+  ```
+
+- 안전한 호출 연산자 `?.` : null 검사와 메소드 호출을 한 번의 연산으로 수행
+
+  ```kotlin
+  // s가 null이 아니라면 메소드 호출, null이라면 null반환
+  // String.toUpperCase가 String을 반환하지만 s?.toUpperCase()은 String?을 반환함
+  s?.toUpperCase()
+  ```
+
+  ```kotlin
+  class Person(val name: String, val company: Company?)
+  
+  fun Person.countryName(): String {
+  	val country = this.company?.address?.country // 널 체크 간단함
+  	return if (country != null) country else "Unknown" // 엘비스 연산자를 이용하면 더 간단하게 나타낼 수 있다
+  }
+  ```
+
+- 엘비스 연산자 `?:` : null 대신 사용할 디폴트값 지정
+
+  ```kotlin
+  fun foo(s: String?) {
+  	val t: String = s ?: "" // s가 null이면 ""로 대체
+  }
+  ```
+
+- 안전한 캐스트 `as?` : 캐스트 할 수 없으면 null 반환
+
+  ```kotlin
+  // equals를 구현할때 주로 사용됨
+  override fun equals(o: Any?): Boolean {
+    val otherPerson = o as? Person ?: return false // Person으로 캐스트 할 수 없으면 false 반환
+    return otherPerson.firstName == firstName && otherPerson.lastName == lastName
+  }
+  ```
+
+- 널 아님 단언 `!!` : 널이 될 수 없는 타입으로 강제로 바꿀 수 있음. 
+
+  ```kotlin
+  fun ignoreNull(s: String?) {
+    val sNotNull: String = s!! // s가 null이면 여기서 NPE
+    println(sNotNull.length)
+  }
+  ```
+
+  - `s!!` 라고 쓰는 건 "컴파일러야, 나는 s가 null이 아님을 잘 알고 있어. 내가 착각했다면 예외가 발생돼도 감수할게" 라는 뜻
+
+- `let` 함수 : null인지 판단 후 결과를 변수에 넣어줌
+
+  ```kotlin
+  val email: String? = ...
+  fun sendEmailTo(email: String) { ... }
+  
+  sendEmailTo(email) // Type mismatch 에러 발생. null이 될 수 있는 타입을 넘길 수 없다
+  if (email != null) sendEmailTo(email) // 이렇게 null체크를 하고 넘겨야 한다.
+  email?.let { email -> sendEmailTo(email) } // null이 아니면 null이 될 수 없는 타입으로 변환 후 전달, null이면 아무일도 안일어남
+  email?.let { sendEmailTo(it) } // it을 사용해서 간단하게
+  ```
+
+  
+
+### 코틀린의 원시 타입
+
+### 컬렉션과 배열
 
 <br/>
 
