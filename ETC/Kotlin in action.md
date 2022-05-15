@@ -1112,7 +1112,7 @@
   }
   
   // kotlin
-  fun strLen(s: String) = s.length // s에 null이거나 nul이 될 수 있는 인자를 넘기면 컴파일 오류
+  fun strLen(s: String) = s.length // s에 null이거나 null이 될 수 있는 인자를 넘기면 컴파일 오류
   fun strLen(s: String?) = s.length // s에 null 가능
   ```
 
@@ -1174,9 +1174,130 @@
   email?.let { sendEmailTo(it) } // it을 사용해서 간단하게
   ```
 
+- `lateinit` : 나중에 초기화
+
+  ```kotlin
+  // lateinit 안쓴다면
+  class MyService {
+    fun performAction(): String = "foo"
+  }
+  
+  class MyTest {
+    private var myService: MyService? = null
+    
+    @Before
+    fun setUp() {
+      myService = MyService();
+    }
+    
+    @Test
+    fun testAction() {
+      Assert.assertEquals("foo", myService!!.performAction())
+    }
+  }
+  ```
+  
+  ```kotlin
+  // lateinit 쓴다면
+  class MyService {
+    fun performAction(): String = "foo"
+  }
+  
+  class MyTest {
+    private lateinit var myService: MyService // null로 초기화할 필요 x. var이어야 함
+    
+    @Before
+    fun setUp() {
+      myService = MyService();
+    }
+    
+    @Test
+    fun testAction() {
+      Assert.assertEquals("foo", myService.performAction()) // null검사 하지 않아도 됨
+    }
+  }
+  ```
+  
+- 널이 될 수 있는 타입(ex: `String?`)에 대한 확장함수
+
+  ```kotlin
+  if (s != null) {
+    s.isBlank()
+  } // 이렇게 할 필요 없이
+  
+  fun String?.isNullOrBlank(): Boolean = 
+    this == null || this.isBlank()
+  s.isNullOrBlank() // 이렇게 쓰면 편함
+  ```
+
+- 타입 파라미터의 널 가능성
+
+  ```kotlin
+  fun <T> printHashCode(t: T) {
+    println(t?.hashCode()) // T는 Any?로 추론되므로 ?를 붙여야 함
+  }
+  >>> printHashCode(null) // null
+  
+  fun <T: Any> printHashCode(t: T) { // Any로 상한 지정 -> null 불가
+    println(t.hashCode()) // T는 null이 될 수 없으므로 ?를 안붙여도 됨
+  }
+  >>> printHashCode(null) // 에러
+  ```
+  
+- 자바와 함께 사용할때
+
+  - 자바의 `@Nullable String` == 코틀린의 `String?`
+  
+  - 자바의 `@NotNull String` == 코틀린의 `String`
+  
+  - 자바 클래스에 애노테이션이 없다면? 조심히 호출해야 한다
+  
+    ```kotlin
+    fun yellAt(person: Person) { // Person은 애노테니션이 없는 자바 클래스
+      println(person.name.toUpperCase() + "!!!")
+    }
+    yellAt(Person(null)) // 에러
+    
+    fun yellAtSafe(person: Person) { // Person은 애노테니션이 없는 자바 클래스
+      println((person.name ?: "Anyone").toUpperCase() + "!!!")
+    }
+    yellAtSafe(Person(null)) // "ANYONE!!!"
+    ```
+  
+  - 자바 인터페이스를 코틀린에서 구현할때
+  
+    ```java
+    // java
+    interface StringProcessor {
+      void process(String value);
+    }
+    ```
+  
+    ```kotlin
+    // kotlin
+    // 아래 두 구현 모두 가능
+    class StringPrinter : StringProcessor {
+      override fun process(value: String) {
+        println(value)
+      }
+    }
+    
+    class NullableStringPrinter : StringProcessor {
+      override fun process(value: String?) {
+        if (value != null) {
+          println(value)
+        }
+      }
+    }
+    ```
   
 
 ### 코틀린의 원시 타입
+
+- 코틀린은 원시 타입과 래퍼 타입을 구분하지 않는다.
+  - 매번 객채로 컴파일되는 건 아니다. 대부분의 경우엔 자바의 원시타입으로 컴파일되고, 그게 안되는 경우(컬렉션에서 쓰거나 제네릭 클래스를 사용하는 경우) 객체로 컴파일된다
+- 널이 될 수 있는 원시타입은 자바 원시 타입으로 표현할 수 없기 때문에 자바의 래퍼 타입으로 컴파일된다
+- 코틀린에서는 한 타입의 숫자를 다른 타입의 숫자로 자동 변환하지 않는다. 대신 변환 메소드를 제공한다
 
 ### 컬렉션과 배열
 
