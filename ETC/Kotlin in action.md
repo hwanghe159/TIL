@@ -1298,8 +1298,63 @@
   - 매번 객채로 컴파일되는 건 아니다. 대부분의 경우엔 자바의 원시타입으로 컴파일되고, 그게 안되는 경우(컬렉션에서 쓰거나 제네릭 클래스를 사용하는 경우) 객체로 컴파일된다
 - 널이 될 수 있는 원시타입은 자바 원시 타입으로 표현할 수 없기 때문에 자바의 래퍼 타입으로 컴파일된다
 - 코틀린에서는 한 타입의 숫자를 다른 타입의 숫자로 자동 변환하지 않는다. 대신 변환 메소드를 제공한다
+- 특별한 타입 `Any`, `Unit`, `Nothing`
+  - `Any` : 모든 원시타입을 포함하는 null이 될 수 없는 조상타입. 자바의 Object
+  - `Unit` : 자바의 void
+  - `Nothing` : 결코 정상 종료되지 않음을 컴파일러에게 알릴때 사용
+
 
 ### 컬렉션과 배열
+
+- 널 가능성과 컬렉션
+
+  - `List<Int?>` : 원소가 null이 될 수 있음
+  - `List<Int>?` : 원소는 null 불가, 전체 리스트가 null이 될 수 있음
+  - `List<Int?>?` : 원소, 전체리스트 모두 null이 될 수 있음
+  - 표준 라이브러리의 `filterNotNull()` 로 `List<Int?>` -> `List<Int>` 변환가능
+
+- 읽기 전용 컬렉션
+
+  - 코틀린은 변경 가능한 컬렉션(`MutabelCollection`)과 읽기전용 컬렉션(`Collection`)의 인터페이스를 나눴다
+
+  - 읽기 전용 컬렉션은 항상 스레드안전한 건 아니다 (같은 객체를 읽기전용 컬렉션 타입과 변경가능 컬렉션 타입의 참조가 같이 있는 경우)
+
+  - 자바는 읽기 전용과 변경 가능 컬렉션을 구분하지 않으므로 코틀린의 읽기 전용 컬렉션을 자바에서 변경할 수 있다. 그래서 컬렉션을 자바로 넘길 때는 주의해야 한다
+
+  - 자바의 인터페이스를 코틀린에서 적절하게 구현하기
+
+    ```java
+    // java
+    
+    interface FileContentProcessor {
+      // 파일에 들어있는 텍스트 처리
+      void processContents(File path, byte[] binaryContents, List<String> textContents);
+    }
+    
+    interface DataParser<T> {
+      void parseData(String input, List<T> output, List<String> errors);
+    }
+    ```
+
+    ```kotlin
+    // kotlin
+    
+    class FileIndexer : FileContentProcessor {
+      // 파일의 내용을 텍스트로 표현 못하는 경우가 있으므로 리스트 널 가능, 파일의 각 줄은 널 불가능, 파일의 내용을 바꿀 필요 없으므로 읽기전용 
+      // 그러므로 List<String>?
+      override fun processContents(path: File, binaryContents: ByteArray?, textContents: List<String>?) {
+        ...
+      }
+    }
+    
+    class PersonParser : DataParser<Person> {
+      // 항상 오류 메시지를 받아야 하므로 리스트 널 불가능, 원소는 널 가능, 구현코드에서 원소 추가해야 하므로 쓰기가능
+      // 그러므로 Mutable<String?>
+      override fun parseData(input: String, output: MutableList<Person>, errors: MutableList<String?>) {
+        ...
+      }
+    }
+    ```
 
 <br/>
 
