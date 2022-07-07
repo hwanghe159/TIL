@@ -111,4 +111,31 @@
   - 장점
     - 애그리거트 간의 의존을 제거하므로 응집도를 높혀주고 모델의 복잡도를 낮춰준다
     - 애그리거트 별로 다른 구현기술을 사용할 수 있다
+  
+- 애그리거트를 팩토리로 사용하기
+
+  
+  - 애그리거트가 갖고 있는 데이터를 이용해서 다른 애그리거트를 생성해야 한다면 팩토리 메서드를 구현하는 걸 고려해보자
+  
+  - ex) Store와 Product 애그리거트가 있고 Product을 생성하는데 Store의 식별자를 필요로 할때 Store에서 팩토리 메서드 구현
+
+    ```java
+    public class Store {
+      
+      @EmbeddedId
+      private StoreId id;
+      private String name;
+      ...
+        
+      public Product createProduct(ProductId productId, ... ) {
+        if (isBlocked()) { // 서비스 레이어에 도메인 로직 처리를 노출시키지 않을 수 있다
+          throw new StoreBlockedException();
+        }
+        return new Product(productId, getId(), ...);
+      }
+    }
+    ```
+  
+
+
 
