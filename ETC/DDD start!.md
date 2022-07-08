@@ -137,5 +137,72 @@
     ```
   
 
+## chapter4. 리포지터리와 모델구현 (JPA 중심)
 
+- JPA를 이용한 리포지터리 구현
 
+  - 모듈 위치
+    - `domain` -> 엔티티, 리포지터리 인터페이스
+    - `infra` -> 리포지터리 구현 클래스
+    - ex
+      -  `domain` -> `Model`, `ModelRepository`,
+      -  `infra` -> `JpaModelRepository`
+
+- 매핑 구현
+
+  - 밸류 타입은 @Embeddable, @Embedded로 매핑
+
+    ```java
+    @Entity
+    @Table(name = "purchase_order")
+    public class Order {
+      ...
+      @Embedded
+      private Orderer orderer;
+    }
+    
+    @Embeddable
+    public class Orderer {
+      @AttributeOverrides(
+      	@AttributeOverride(name = "id", column = @Column(name = "orderer_id")) 
+      )
+      private MemberId memberId;
+    	...
+    }
+    
+    @Embeddable
+    public class MemberId implements Serializable {
+      @Column(name="member_id")
+      private String id;
+      ...
+    }
+    ```
+
+  - 컬럼 <-> 필드 변환은 AttributeConverter 이용 (autoApply=true면 전역으로 변환)
+
+  - 밸류 컬렉션을 별도 테이블로 매핑할때는 `@ElementCollection`, `@CollectionTable` 사용
+
+    <img src="../images/value_collection.jpeg" alt="value_collection" style="zoom:30%;" />
+
+    ```java
+    @Entity
+    @Table(name = "purchase_order")
+    public class Order {
+      ...
+      @ElementCollection
+      @CollectionTable(name = "order_line", joinColumns = @JoinColumn(name = "order_number"))
+      @OrderColumn(name = "line_idx")
+      private List<OrderLine> orderLines;
+    }
+    
+    @Embeddable
+    public class OrderLine {
+      ...
+    }
+    ```
+
+- 애그리거트 로딩 전략
+
+- 애그리거트의 영속성 전파
+
+- 식별자 생성 기능
