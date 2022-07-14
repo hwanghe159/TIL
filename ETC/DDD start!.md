@@ -178,7 +178,13 @@
     }
     ```
 
-  - 컬럼 <-> 필드 변환은 AttributeConverter 이용 (autoApply=true면 전역으로 변환)
+    - 밸류 타입을 식별자로 매핑하려면 `@EmbeddedId`를 사용 (단, JPA에서 식별자는 Serializable 타입이어야 하기 때문에 Serializable을 구현해야 함.)
+
+  - 컬럼 <-> 필드 변환은 `AttributeConverter` 이용 (autoApply=true면 전역으로 변환)
+
+    - 예 : email array json을 필드로 저장하고 싶을때
+
+    - `Set<Email>` 을 갖고 있는 클래스를 만들어서 `EmailSetConverter`구현
 
   - 밸류 컬렉션을 별도 테이블로 매핑할때는 `@ElementCollection`, `@CollectionTable` 사용
 
@@ -200,6 +206,50 @@
       ...
     }
     ```
+
+  - 밸류를 저장하기 위해 별도 테이블을 만들때
+
+    - 별도 테이블이 있다 해서 엔티티인 건 아니다
+
+      - 1:1 관계인 Article(제목 포함)과 ArticleContent(내용 포함)가 있을때, Article은 엔티티, ArticleContent는 밸류
+
+    - 자신만의 독자적인 라이프사이클을 갖는다면 다른 애그리거트일 가능성이 높다
+
+      - 예 : 상품과 리뷰. 둘은 같은 화면에서 보여줄 진 몰라도 생성주체와 변경 주체가 다르다. 둘은 다른 애그리거트
+
+    - 예
+
+      ```java
+      @Entity
+      @SecondaryTable(
+      	name = "article_content", // 밸류를 저장할 테이블 이름
+        pkJoinColumns = @PrimaryKeyJoinColumn(name = "id") // 밸류 테이블에서 엔티티 테이블로 조인할때 사용할 컬럼
+      )
+      public class Article {
+        
+        @Id
+        private Long id;
+        private String title;
+        ...
+          
+        @AttributeOverrides({ // 밸류를 위한 테이블 정의
+          @AttributeOverride(name = "content", column = @Column(table = "article_content")),
+          @AttributeOverride(name = "contentType", column = @Column(table = "article_content")),
+        })
+        private ArticleContent content;
+        ...
+      }
+      
+      @Embeddable
+      public class ArticleContent {
+        
+      }
+      ```
+
+  - 밸류 컬렉션을 @Entity로 매핑하기
+
+    - 예 : 계층 구조를 갖는 밸류 타입 (Product 엔티티와 Image 밸류)
+    - 
 
 - 애그리거트 로딩 전략
 
