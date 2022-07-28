@@ -249,10 +249,72 @@
   - 밸류 컬렉션을 @Entity로 매핑하기
 
     - 예 : 계층 구조를 갖는 밸류 타입 (Product 엔티티와 Image 밸류)
-    - 
+    - <img src="/Users/hwangjunho/Documents/GitHub/TIL/images/IMG_BAEB0BC8969D-1.jpeg" alt="IMG_BAEB0BC8969D-1" style="zoom:30%;" />
+    - <img src="/Users/hwangjunho/Documents/GitHub/TIL/images/IMG_E66E67B29DD2-1.jpeg" alt="IMG_E66E67B29DD2-1" style="zoom:25%;" />
+    - ```java
+      // 방법1. 상속구조로 다형성의 이점을 누릴 수 있지만 Product가 삭제될때 Image에 대한 delete쿼리가 개별로 나감
+      
+      @Entity
+      @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+      @DiscriminatorColumn(name = "image_type") // 타입 구분용 컬럼
+      @Table(name = "image")
+      public abstract class Image {
+        ... // 밸류이므로 상태를 변경하는 기능은 추가하지 않고 Product에 완전히 의존한다
+      }
+      
+      @Entity
+      @DiscriminatorValue("II") // 타입 구분용 컬럼에 들어갈 값
+      public class InternalImage extends Image {
+        ...
+      }
+      
+      @Entity
+      @DiscriminatorValue("EI") // 타입 구분용 컬럼에 들어갈 값
+      public class ExternalImage extends Image {
+        ...
+      }
+      ```
+    - ```java
+      // 방법2. 다형성의 이점은 누릴 수 없지만 Product가 삭제될때 Image에 대해 bulk delete 쿼리가 나감
+      
+      @Embeddable
+      public class Image {
+        ... 
+          
+        public boolean hasTumbnail() {
+          if (imageType.equals("II")) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
+      ```
+    
+  - id참조로 단방향 M:N 매핑 (예: Product와 Category 단방향 M:N 매핑)
+
+    - ```java
+      @Entity
+      @Table(name = "product")
+      public class Product {
+        
+        @EmbeddedId
+        private ProductId id;
+        
+        @ElementCollection
+        @CollectionTable(
+          name = "product_category", // product-category 매핑테이블 정의
+          joinColumns = @JoinColumn(name = "product_id")
+        )
+        private Set<CategoryId> categoryIds;
+        
+        ...
+      }
+      ```
+    
+    - Product를 삭제할때 매핑데이터도 삭제된다
 
 - 애그리거트 로딩 전략
 
 - 애그리거트의 영속성 전파
 
-- 식별자 생성 기능
