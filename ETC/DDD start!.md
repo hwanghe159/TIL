@@ -339,3 +339,72 @@
 
 ## chapter5. 리포지터리의 조회 기능 (JPA 중심)
 
+- 검색을 위한 스펙
+
+  - 스펙(`Specification`)은 애그리거트가 특정 조건을 충족하는지 여부를 검사한다
+
+    ```java
+    public interface Specification<T> {
+      public boolean isSatisfiedBy(T agg); // agg = 검사 대상이 되는 애그리거트
+    }
+    ```
+
+  - 예를 들어 특정 고객의 주문인지 확인하는 스펙은?
+
+    ```java
+    public class OrdererSpec implements Specification<Order> { 
+      private String ordererId;
+    
+      public OrdererSpec(String ordererId) {
+        this.ordererId = ordererId;
+      }
+    
+      public boolean isSatisfiedBy(Order agg) {
+        return agg.getOrdererId().getMemberId().getld().equals(ordererId); 
+      }
+    }
+    
+    public class MemoryOrderRepository implements OrderRepository {
+      public List<Order> findAll(Specification spec) {
+        return findAll().stream()
+          .filter(order -> spec.isSatisfiedBy(order))
+          .collect(toList());
+      }
+    }
+    ```
+
+    ```java
+    Specification<Order> ordererSpec = new OrdererSpec("고객id");
+    List<Order> orders = orderRepository.findAll(ordererSpec);
+    ```
+
+  - 또한 조합할수도 있다
+
+    ```java
+    public class AndSpec<T> implements Specification<T> { 
+      private List<Specification<T> specs;
+    
+      public AndSpecification(Specification<T>... specs) { 
+        this.specs = Arrays.asList(specs);
+      }
+      
+      public boolean isSatisfiedBy(T agg) {
+        return specs.stream()
+          .allMatch(spec -> spec.isSatisfiedBy(agg));
+      }
+    }
+    ```
+
+    ```java
+    // 고객id와 기간으로 주문 검색
+    Specification<Order> ordererSpec = new OrdererSpec("고객id"); 
+    Specification<Order> orderDateSpec = new OrderDateSpec(fromDate, toDate); 
+    AndSpec<T> spec = new AndSpec(ordererSpec, orderDateSpec);
+    List<Order> orders = orderRepository.findAll(spec);
+    ```
+
+- JPA를 위한 스펙 구현
+
+  - 하지만 위처럼 하면 애그리거트가 10만개인 경우 모두 메모리에 올려 걸러내야 한다. 실제론 JPA에선 `CriteriaBuilder`와 `Predicate`를 이용하여 where절을 사용하도록 구현해야 한다
+
+- 이후 Criteria를 사용하는 조회 부분 생략
