@@ -105,7 +105,9 @@
        if (value instanceof String) {
          System.out.println(((String) value).toUpperCase());
        }
+       ```
        
+       ```kotlin
        // kotlin
        if (value is String)
          println(value.toUpperCase())
@@ -313,7 +315,7 @@
     )
     ```
 
-  - 위 코드를 자바, 코틀린에서 사용하기
+  - 위 코틀린 코드를 자바, 코틀린에서 사용하기
 
     ```java
     // java
