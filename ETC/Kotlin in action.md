@@ -524,8 +524,7 @@
     fun isNotDigit(c: Char) = c !in '0'..'9'
     
     // Comparable을 구현하고 있으면 범위를 만들 수 있다.
-    // ("Kotlin" >= "Java" && "Kotlin" <= "Scala") 와 같음
-    println("Kotlin" in "Java".."Scala")
+    println("Kotlin" in "Java".."Scala") // ("Kotlin" >= "Java" && "Kotlin" <= "Scala") 와 같음
     
     // 컬렉션에서도 in 사용 가능
     println("Kotlin" in setOf("Java", "Scala"))
@@ -805,7 +804,7 @@
     ```
 
     - `1.to("one")` 와 `1 to "one"`은 같다
-    - 중위 호출을 허용하게 하려면 infix 변경자를 추가해야 한다
+    - 중위 호출을 허용하게 하려면 `infix` 변경자를 추가해야 한다
 
   
 
