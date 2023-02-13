@@ -962,6 +962,52 @@
     | internal  | 같은 모듈 안에서만 볼 수 있다   | 같은 모듈 안에서만 볼 수 있다 |
     | protected | 하위 클래스 안에서만 볼 수 있다 | 적용 불가                     |
     | private   | 같은 클래스 안에서만 볼 수 있다 | 같은 파일 안에서만 볼 수 있다 |
+    
+    자바의 `protected` vs 코틀린의 `protected`
+    
+    - 자바는 같은 패키지 안에서 protected 멤버에 접근 가능, 코틀린을 불가능
+  
+- 내부 클래스와 중첩 클래스
+
+  - ```java
+    // java
+    class Outer {
+      // 내부 클래스
+      public class Innter {
+        // Outer 클래스에 대한 참조를 저장함
+      }
+    }
+    
+    class Outer {
+      // 중첩 클래스
+      public static class Innter {
+        // Outer 클래스에 대한 참조를 저장하지 않음
+      }
+    }
+    ```
+  
+    ```kotlin
+    // kotlin
+    class Outer {
+      // 내부 클래스
+      inner class Inner {
+        // Outer 클래스에 대한 참조를 저장함
+        fun getOuterReference(): Outer = this@Outer
+      }
+    }
+    
+    class Outer {
+      // 중첩 클래스
+      class Inner {
+        // Outer 클래스에 대한 참조를 저장하지 않음
+      }
+    }
+    ```
+  
+    
+  
+  - 
+  
 
 ### 뻔하지 않은 생성자와 프로퍼티를 갖는 클래스 선언
 
