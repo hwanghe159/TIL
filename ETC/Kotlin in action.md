@@ -917,7 +917,7 @@
     // 인터페이스 선언
     interface Clickable {
       fun click() // 일반 메소드 선언
-      fun showoff() = println("나는 clickable!") // 디폴트 구현이 있는 메소드
+      fun showoff() = println("나는 clickable!") // 디폴트 구현이 있는 메소드. default 키워드를 붙이지 않아도 된다
     }
     
     // 인터페이스 구현
@@ -932,6 +932,8 @@
 
   - 자바에선 `@Override는` 필수는 아니지만 코틀린에선 `override` 변경자가 필수다
 
+  - 여러 인터페이스를 구현하는데, 디폴트 메서드가 겹치면 해당 디폴트 메서드는 오버라이드 해야 한다
+
   - 상위타입의 구현을 호출할때는 super를 사용한다
 
     - `super<Clickable>.showoff()`
@@ -942,50 +944,64 @@
 
     - 상위 클래스의 변경으로 인해 하위 클래스가 깨지기 쉽기 때문이다
 
-    - 상속을 허용하려면 open 변경자를 붙여야 한다
-    - 오버라이드를 허용하고 싶은 메소드나 프로퍼티 앞에도 open을 붙여야 한다
+    - 상속을 허용하려면 `open` 변경자를 붙여야 한다
+    - 오버라이드를 허용하고 싶은 메소드나 프로퍼티 앞에도 `open`을 붙여야 한다
+    
+    ```kotlin
+    open class RichButton : Clickable { // 이 클래스는 다른 클래스에서 상속할 수 있다
+      fun disable() {} // 하위 클래스에서 오버라이드 불가능
+      open fun animate() {} // 하위 클래스에서 오버라이드 가능
+      override fun click() {} // 상위 클래스를 오버라이드함. 하위 클래스에서 오버라이드 가능
+      final override fun click2() {} // 상위 클래스를 오버라이드함. 하위 클래스에서 오버라이드 불가능
+    }
+    ```
   
 - 상속 제어 변경자 (access modifier)
 
-  - | 변경자   | 이 변경자가 붙은 메서드는...                             | 설명                                                         |
-    | -------- | -------------------------------------------------------- | ------------------------------------------------------------ |
-    | final    | 오버라이드 할 수 없음                                    | 클래스 멤버 메서드의 기본 변경자                             |
-    | open     | 오버라이드 할 수 있음                                    | 반드시 open을 명시해야 오버라이드할 수 있다                  |
-    | abstract | 반드시 오버라이드 해야 함                                | 추상 클래스의 멤버메서드에만 이 변경자를 붙일 수 있다. 추상 멤버메서드에는 구현이 있으면 안된다 |
-    | override | 상위 클래스나 상위 인스턴스의 메서드를 오버라이드 하는중 | 오버라이드하는 멤버메서드는 기본적으로 열려있다. 하위 클래스의 오버라이드를 금지하려면 final을 명시헤야 한다 |
+  | 변경자   | 이 변경자가 붙은 메서드는...                             | 설명                                                         |
+  | -------- | -------------------------------------------------------- | ------------------------------------------------------------ |
+  | final    | 오버라이드 할 수 없음                                    | 클래스 멤버 메서드의 기본 변경자                             |
+  | open     | 오버라이드 할 수 있음                                    | 반드시 open을 명시해야 오버라이드할 수 있다                  |
+  | abstract | 반드시 오버라이드 해야 함                                | 추상 클래스의 멤버메서드에만 이 변경자를 붙일 수 있다. 추상 멤버메서드에는 구현이 있으면 안된다 |
+  | override | 상위 클래스나 상위 인스턴스의 메서드를 오버라이드 하는중 | 오버라이드하는 멤버메서드는 기본적으로 열려있다. 하위 클래스의 오버라이드를 금지하려면 final을 명시헤야 한다 |
   
 - 가시성 변경자 (visibility modifier)
 
-  - | 변경자    | 클래스 멤버                     | 최상위 선언                   |
-    | --------- | ------------------------------- | ----------------------------- |
-    | public    | 모든 곳에서 볼 수 있다          | 모든 곳에서 볼 수 있다        |
-    | internal  | 같은 모듈 안에서만 볼 수 있다   | 같은 모듈 안에서만 볼 수 있다 |
-    | protected | 하위 클래스 안에서만 볼 수 있다 | 적용 불가                     |
-    | private   | 같은 클래스 안에서만 볼 수 있다 | 같은 파일 안에서만 볼 수 있다 |
-    
-    자바의 `protected` vs 코틀린의 `protected`
-    
-    - 자바는 같은 패키지 안에서 protected 멤버에 접근 가능, 코틀린을 불가능
-  
+  | 변경자    | 클래스 멤버                     | 최상위 선언                   |
+  | --------- | ------------------------------- | ----------------------------- |
+  | public    | 모든 곳에서 볼 수 있다          | 모든 곳에서 볼 수 있다        |
+  | internal  | 같은 모듈 안에서만 볼 수 있다   | 같은 모듈 안에서만 볼 수 있다 |
+  | protected | 하위 클래스 안에서만 볼 수 있다 | 적용 불가                     |
+  | private   | 같은 클래스 안에서만 볼 수 있다 | 같은 파일 안에서만 볼 수 있다 |
+
+  - 자바의 `protected` vs 코틀린의 `protected`
+
+    - 자바는 같은 패키지 안에서 `protected` 멤버에 접근 가능, 코틀린을 불가능
+
 - 내부 클래스와 중첩 클래스
+
+  - 외부 클래스에 대한 접근권한이 있으면 내부 클래스, 없으면 중첩 클래스이고, 코틀린에선 기본적으로 중첩 클래스다.
 
   - ```java
     // java
     class Outer {
       // 내부 클래스
-      public class Innter {
+      public class Inner {
         // Outer 클래스에 대한 참조를 저장함
+        public Outer getOuterReference() {
+          return Outer.this;
+        }
       }
     }
     
     class Outer {
       // 중첩 클래스
-      public static class Innter {
+      public static class Inner {
         // Outer 클래스에 대한 참조를 저장하지 않음
       }
     }
     ```
-  
+
     ```kotlin
     // kotlin
     class Outer {
@@ -1003,15 +1019,150 @@
       }
     }
     ```
-  
+
+  - | 클래스 B 내부에 클래스 A | 자바           | 코틀린        |
+    | ------------------------ | -------------- | ------------- |
+    | 중첩 클래스              | static class A | class A       |
+    | 내부 클래스              | class A        | inner class A |
+
+- 봉인된 클래스
+
+  - 하위 클래스를 제한하고 싶을 때 `sealed` 키워드를 사용한다.
+
+  - ```kotlin
+    sealed class Expr {
+      // Expr의 하위 클래스로 등록하고 싶은 클래스들을 중첩클래스로 나열한다
+      class Num(val value: Int) : Expr()
+      class Sum(val left: Expr, val right: Expr) : Expr()
+    }
     
+    fun eval(e: Expr): Int = 
+      when (e) {
+        is Expr.Num -> e.value
+        is Expr.Sum -> eval(e.right) + eval(e.left)
+        // else문이 따로 필요없다. 만약 새로운 하위클래스가 생긴다면 컴파일 오류로 인해 해당 식에 추가해야 하는 사실을 바로 알 수 있다
+      }
+    ```
+
+  - sealed 클래스는 자동으로 open이다
   
-  - 
-  
+  - ...
 
 ### 뻔하지 않은 생성자와 프로퍼티를 갖는 클래스 선언
 
+- 코틀린에서는 주생성자와 부생성자를 구분하고, 초기화 블록을 통해 초기화 로직을 추가할 수 있다.
+
+- 생성자와 초기화 로직을 선언하는 여러 방법
+
+  ```kotlin
+  class User(val nickname: String) // 괄호 안 부분이 주생성자
+  ```
+
+  ```kotlin
+  class User(_nickname: String) {
+    val nickname = _nickname
+  }
+  ```
+
+  ```kotlin
+  // constructor은 주/부생성자 정의 시작할때 사용하는 키워드. 인스턴스화를 막으려면 constructor 앞에 private를 붙이면 됨
+  class User constructor(_nickname: String) {
+    
+    val nickname: String
+    
+    init { // 초기화 블록
+      nickname = _nickname
+    }
+  }
+  ```
+
+- 인스턴스 생성하기
+
+  ```kotlin
+  class User(val nickname: String, val isSubscribed: Boolean = true) // isSubscribed에 디폴트값 적용
+  
+  val junho1 = User("준호");
+  val junho2 = User("준호", false);
+  val junho3 = User("준호", isSubscribed = false);
+  ```
+
+- 기반 클래스가 있을땐
+
+  ```kotlin
+  open class User(val nickname: String)
+  // 기반클래스 이름 뒤에 괄호를 치고 생성자 인자를 넘긴다. 기반클래스 이름 뒤에 괄호는 필수 (인터페이스는 괄호없음)
+  class TwitterUser(nickname: String) : User(nickname) { ... }
+  ```
+
+- 주생성자 없이 부생성자만 있다면 최종적으로는 상위 클래스에 위임해야 한다
+
+  ```kotlin
+  open class View { // 주생성자 없음
+    constructor(ctx: Context) { // 부생성자
+      ...
+    }
+    
+    constructor(ctx: Context, attrL AttributeSet) { // 부생성자
+      ...
+    }
+  }
+  
+  class MyButton : View {
+    constructor(ctx: Context) : super(ctx, MY_STYLE) { ... } // 두번째 부생성자에 위임
+    constructor(ctx: Context, attr: AttributeSet) : super(ctx, attr) { ... } // 상위 클래스에 위임
+  }
+  ```
+
+- 인터페이스의 프로퍼티 구현하기
+
+  ```kotlin
+  interface User {
+    val nickname: String // 추상 프로퍼티. 구현클래스가 nickname을 얻을 수 있는 방법을 제공해야 한다
+  }
+  
+  // 주생성자 안에 프로퍼티를 직접 선언. override 표시 필수
+  class PrivateUser(override val nickname: String) : User
+  
+  // nickname을 매번 계산한다
+  class SubscribingUser(val email: String) : User {
+    override val nickname: String
+    	get() = email.substringBefore('@')
+  }
+  
+  // nickname을 처음 초기화시 구해서 뒷받침하는 필드에 저장한다
+  class FacebookUser(val accountId: Int) : User {
+    override val nickname = getFacebookName(accountId)
+  }
+  ```
+
+- 게터와 세터에서 뒷받침하는 필드에 접근 (`field` 사용)
+
+  ```kotlin
+  class User(val name: String) {
+    var address: String = "unspecified"
+    	set(value: String) {
+        println("""$name 의 주소 변경! "$field" -> "$value".""") // 뒷받침하는 필드 읽기. field라는 키워드 사용
+        field = value // 뒷받침하는 필드 쓰기
+      }
+  }
+  ```
+
+- 접근자의 가시성 변경
+
+  ```kotlin
+  class LengthCounter {
+    var counter: Int = 0
+    	private set // 외부에서 세터 사용 불가.
+    
+    fun addWord(word: String) { // 이 메서드만을 사용하여 counter를 변경할 수 있다
+      counter += word.length
+    }
+  }
+  ```
+
 ### 컴파일러가 생성한 메서드: 데이터 클래스와 클래스 위임
+
+- 
 
 ### object 키워드: 클래스 선언과 인스턴스 생성
 
