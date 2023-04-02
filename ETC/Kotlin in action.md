@@ -1162,9 +1162,120 @@
 
 ### 컴파일러가 생성한 메서드: 데이터 클래스와 클래스 위임
 
-- 
+- 코틀린에선 `equals`, `hashCode`, `toString` 을 보이지 않는 곳에서 생성해주기 때문에 직접 작성하지 않아도 된다
+
+- 오버라이드는 가능하다
+
+  - `toString` : 기본 문자열 표현(ex : `Client@5e9f23b4`)보다 더 많은 정보를 제공하여 디버깅, 로깅 등에 사용
+
+    ```kotlin
+    class Client(val name: String, val postalCode: Int) {
+      override fun toString() = "Client(name=$name, postalCode=$postalCode)"
+    }
+    ```
+
+  - `equals` : 동등성 정의
+
+    ```kotlin
+    class Client(val name: String, val postalCode: Int) {
+      override fun equals(other: Any?): Boolean { // Any는 자바에서의 Object
+        if (other == null || other !is Client)
+        	return false
+        return name == other.name && postalCode == other.postalCode
+      }
+    }
+    ```
+
+    - 자바의 `equals`는 코틀린의 `==`
+    - 자바의 `==`는 코틀린의 `===`
+    - 코틀린에선 기본적으로 `==`를 사용한다
+
+  - `hashCode` : 해시 컨테이너
+
+    ```kotlin
+    class Client(val name: String, val postalCode: Int) {
+      override fun hashCode(): Int = name.hashCode() * 31 + postalCode
+    }
+    ```
+
+    - JVM 언어에서는 hashCode가 지켜야 하는 "equals()가 true를 반환하는 두 객체는 반드시 같은 hashCode()를 반환해야 한다"하는 제약이 있다.
+    - HashSet은 원소를 비교할때 비용을 줄이기 위해 객체의 hashCode를 비교하고 같은 경우에만 실제 값을 비교한다.
+
+- 하지만 데이터클래스로 선언하면 위 3개를 자동으로 만들어준다 (단, 데이터를 저장하는 역할만 수행할때)
+
+  ```kotlin
+  data class Client(val name: String, val postalCode: Int) {
+    // copy : 데이터 클래스를 불변으로 유지하면서 일부 프로퍼티를 바꿀 수 있도록 해주는 편의 메소드
+    fun copy(name: String = this.name, postalCode: Int = this.postalCode) = Client(name, postalCode)
+  }
+  ```
+
+- `by` 키워드
+
+  - 하위 클래스가 상위 클래스의 메서드를 오버라이드하면 의존이 생기므로 문제가 생기는 경우가 있다. 그래서 코틀린에서는 기본적으로 상속을 막고있고, `open` 키워드를 통해 확장할 수 있다.
+
+  - 상속을 허용하지 않는 클래스에 새로운 동작을 추가해야 할 땐 데코레이터 패턴을 주로 사용한다
+
+  - 하지만 데코레이터 패턴은 준비 코드가 상당히 많이 필요하다. 코틀린의 `by`는 이를 해결해준다
+
+    ```kotlin
+    // MutableCollection를 확장. 원소를 추가하려고 시도한 횟수를 기록하는 컬렉션을 데코레이터 패턴을 사용하려 구현한 코드.
+    
+    class CountingSet<T>(
+      val innerSet: MutableCollection<T> = HashSet<T>()
+    ) : MutableCollection<T> by innerSet { // 구현을 innerSet에게 위임
+    
+      var objectAdded = 0
+      
+      override fun add(element: T): Boolean { // 이 두 메서드 외에 Collection의 메서드들을 오버라이드 할 필요없다.
+        objectAdded++
+        return innerSet.add(element)
+      }
+      
+      override fun addAll(c: Collection<T>): Boolean {
+        objectAdded += c.size
+        return innerSet.addAll(c)
+      }
+    }
+    ```
+
 
 ### object 키워드: 클래스 선언과 인스턴스 생성
+
+- `object` 키워드를 사용하는 경우 (클래스를 정의하면서 동시에 인스턴스 생성)
+
+  - 객체 선언
+  - 동반 객체
+  - 객체 식
+
+- 객체 선언 : 싱글턴을 정의하는 방법 중 하나
+
+  - 자바에선 싱글턴을 정의할때 생성자를 private으로 정의하고 정적 필드에 객체를 저장하는 방식으로 구현하지만, 코틀린에선 객체 선언이라는 기능을 통해 싱글턴을 지원한다
+
+    ```kotlin
+    object Payroll { // 클래스 정의 + 인스턴스 만들어서 변수에 저장하는 작업 한번에 수행
+      
+      val allEmployees = arrayListOf<Person>()
+      
+      fun calculateSalary() {
+        for (person in allEmployees){
+          ...
+        }
+      }
+    }
+    
+    // 사용할땐..
+    Payroll.allEmployees.add(Person(...))
+    Payroll.calculateSalary()
+    
+    // 자바에서 사용할땐..
+    Payroll.INSTANCE.calculateSalary()
+    ```
+
+- 동반 객체 : 팩토리 메서드와 정적 멤버가 들어갈 장소
+
+  - 코틀린은 자바의 static을 지원하지 않는다. 대신 코틀린의 최상위 함수나, 객체 선언을 사용하면 된다
+  - 
 
 <br/>
 
