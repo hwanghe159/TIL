@@ -1275,7 +1275,92 @@
 - 동반 객체 : 팩토리 메서드와 정적 멤버가 들어갈 장소
 
   - 코틀린은 자바의 static을 지원하지 않는다. 대신 코틀린의 최상위 함수나, 객체 선언을 사용하면 된다
-  - 
+  - 하지만 최상위 함수는 private 멤버변수에 접근할 수 없다 -> 팩토리 메서드나 정적 멤버를 정의하고 싶으면 private 멤버변수에 접근할 수 있는 동반객체를 사용한다
+  
+  ```kotlin
+  class User private constructor(val nickname: String) { // 주 생성자를 private으로
+    companion object { // companion 키워드로 동반객체 선언
+      fun newSubscribingUser(email: String) = User(email.substringBefore('@'))
+      fun newFacebookUser(accountId: Int) = User(getFacebookName(accountId))
+    }
+  }
+  
+  // 사용할땐..
+  val user1 = User.newSubscribingUser("bob@gmail.com")
+  val user2 = User.Companion.newSubscribingUser("bob@gmail.com") // 이름이 없으면 기본적으로 Companion 이다
+  val user3 = User.newFacebookUser(4)
+  ```
+  
+  - 동반객체를 일반객체처럼 사용하기
+  
+    1. 동반객체에 이름 붙이기
+  
+       ```kotlin
+       class Person(val name: String) {
+         companion object Loader { // Loader 라는 이름 붙임
+           fun fromJSON(jsonText: String): Person = ...
+         }
+       }
+       
+       // 사용할땐..
+       val person1 = Person.Loader.fromJSON("{name:'junho'}")
+       val person2 = Person.fromJSON("{name:'junho'}") // 이름은 생략 가능
+       ```
+  
+    2. 동반객체가 인터페이스를 상속하기
+  
+       ```kotlin
+       interface JSONFactory<T> {
+         fun fromJSON(jsonText: String): T
+       }
+       
+       class Person(val name: String) {
+         companion object : JSONFactory<Person> {
+           override fun fromJSON(jsonText: String): Person = ... // 인터페이스 구현
+         }
+       }
+       
+       // 아래 메서드에 동반객체의 인스턴스를 넘길 수 있다
+       fun loadFromJSON<T>(factory: JSONFactory<T>): T { ... }
+       loadFromJSON(Person)
+       ```
+  
+    3. 동반객체 안에 확장함수와 프로퍼티 정의하기
+  
+       - 만약 Person이 핵심 비즈니스 로직 모듈의 일부라 역직렬화 로직을 분리하고 싶을땐 아래처럼 작성할 수 있다
+  
+       ```kotlin
+       class Person(val firstName: String, val lastName: String) {
+         companion object { // 비어있는 동반 객체 선언
+         }
+       }
+       
+       class Person.Companion.fromJSON(json: String): Person { // 확장함수 선언
+         ...
+       }
+       
+       val person = Person.fromJSON(json)
+       ```
+  
+- 객체 식
+
+  - object 키워드를 싱글턴에만 사용하는 게 아니라 무명객체를 정의할때에도 사용한다.
+  
+  ```kotlin
+  interface MouseAdapter {
+    fun mouseClicked(e: MouseEvent)
+    fun mouseEntered(e: MouseEvent)
+  }
+  
+  window.addMouseListener(
+  	object : MouseAdapter() { // MouseAdapter를 확장하는 무명객체 선언
+      override fun mouseClicked(e: MouseEvent) { ... }
+      override fun mouseEntered(e: MouseEvent) { ... }
+    }
+  )
+  ```
+  
+  
 
 <br/>
 
