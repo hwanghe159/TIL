@@ -1346,21 +1346,74 @@
 
   - object 키워드를 싱글턴에만 사용하는 게 아니라 무명객체를 정의할때에도 사용한다.
   
-  ```kotlin
-  interface MouseAdapter {
-    fun mouseClicked(e: MouseEvent)
-    fun mouseEntered(e: MouseEvent)
+  ```java
+  @FunctionalInterface
+  public interface Comparator<T> {
+    int compare(T o1, T o2);
   }
-  
-  window.addMouseListener(
-  	object : MouseAdapter() { // MouseAdapter를 확장하는 무명객체 선언
-      override fun mouseClicked(e: MouseEvent) { ... }
-      override fun mouseEntered(e: MouseEvent) { ... }
-    }
-  )
   ```
   
+  ```java
+  // java
+  List<String> result = Stream.of("aaa", "a", "aa", "aaaa")
+      .sorted(new Comparator<String>() { // Comparator를 구현하는 무명객체
+        @Override
+        public int compare(String o1, String o2) {
+          return Integer.compare(o1.length(), o2.length());
+        }
+      })
+      .collect(Collectors.toUnmodifiableList());
   
+  System.out.println(result); // [a, aa, aaa, aaaa]
+  ```
+  
+  ```kotlin
+  // kotlin
+  val result = Stream.of("aaa", "a", "aa", "aaaa")
+      .sorted(object : Comparator<String> { // Comparator를 구현하는 무명객체
+          override fun compare(o1: String, o2: String): Int {
+              return Integer.compare(o1.length, o2.length)
+          }
+      })
+      .collect(Collectors.toUnmodifiableList())
+  println(result) // [a, aa, aaa, aaaa]
+  ```
+  
+  - 여러 인터페이스/클래스를 구현/확장할 수 있는가?
+    - java : 한 인터페이스/클래스만 구현/확장 가능
+    - kotlin : 여러 인터페이스/클래스를 구현/확장할 수 있다
+  
+  ```kotlin
+  // kotlin
+  val result = Stream.of("aaa", "a", "aa", "aaaa")
+      .sorted(object : Comparator<String>, Function<String, String> { // 여러 인터페이스/클래스 구현/확장 가능
+          override fun compare(o1: String, o2: String): Int {
+              return Integer.compare(o1.length, o2.length)
+          }
+  	      override fun apply(t: String): String { ... }
+      })
+      .collect(Collectors.toUnmodifiableList())
+  println(result) // [a, aa, aaa, aaaa]
+  ```
+  
+  - 객체 식 안의 코드에서 final이 아닌 변수를 사용할 수 있는가?
+    - java : 불가
+    - kotlin : 가능
+  
+  
+  ```kotlin
+  // kotlin
+  var compareCount = 0
+  val result = Stream.of("aaa", "a", "aa", "aaaa")
+      .sorted(object : Comparator<String> {
+          override fun compare(o1: String, o2: String): Int {
+              compareCount++ // 가능
+              return Integer.compare(o1.length, o2.length)
+          }
+      })
+      .collect(Collectors.toUnmodifiableList())
+  println(result)
+  ```
 
 <br/>
 
