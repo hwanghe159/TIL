@@ -1046,7 +1046,9 @@
 
   - sealed 클래스는 자동으로 open이다
   
-  - ...
+  - sealed 클래스는 private 생성자를 가진다
+  
+  - sealed 인터페이스는 정의할 수 없다. 자바에서 구현을 막을 방법이 없기 때문
 
 ### 뻔하지 않은 생성자와 프로퍼티를 갖는 클래스 선언
 
@@ -1089,6 +1091,7 @@
 - 기반 클래스가 있을땐
 
   ```kotlin
+  // 기반클래스
   open class User(val nickname: String)
   // 기반클래스 이름 뒤에 괄호를 치고 생성자 인자를 넘긴다. 기반클래스 이름 뒤에 괄호는 필수 (인터페이스는 괄호없음)
   class TwitterUser(nickname: String) : User(nickname) { ... }
@@ -1098,18 +1101,18 @@
 
   ```kotlin
   open class View { // 주생성자 없음
-    constructor(ctx: Context) { // 부생성자
+    constructor(ctx: Context) { // 첫번째 부생성자
       ...
     }
     
-    constructor(ctx: Context, attrL AttributeSet) { // 부생성자
+    constructor(ctx: Context, attr: AttributeSet) { // 두번째 부생성자
       ...
     }
   }
   
   class MyButton : View {
-    constructor(ctx: Context) : super(ctx, MY_STYLE) { ... } // 두번째 부생성자에 위임
-    constructor(ctx: Context, attr: AttributeSet) : super(ctx, attr) { ... } // 상위 클래스에 위임
+    constructor(ctx: Context) : this(ctx, MY_STYLE) { ... } // MyButton의 두번째 부생성자에 위임 -> View의 두번째 부생성자에 위임
+    constructor(ctx: Context, attr: AttributeSet) : super(ctx, attr) { ... } // View의 두번째 부생성자에 위임
   }
   ```
 
