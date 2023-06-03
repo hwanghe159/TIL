@@ -1810,6 +1810,230 @@
 
 ## 7장. 연산자 오버로딩과 기타 관례
 
+- 관례란?
+  - 어떤 언어 기능과 미리 정해진 이름의 함수를 연결해주는 기법을 관례라고 부른다.
+  - 예: 어떤 클래스 안에 `plus` 라는 메서드를 정의
+  - 자바 vs 코틀린
+    - 자바는 언어 기능을 타입에 의존, 코틀린은 언어 기능을 관례에 의존
+
+### 산술 연산자 오버로딩
+
+- 이항 산순 연산 오버로딩
+
+  - 클래스 내에서 `+` 연산자 구현하기
+
+    - ```kotlin
+      // 선언
+      data class Point(val x: Int, val y: Int) {
+        operator fun plus(other: Point): Point { // operator를 꼭 붙여야 한다
+          return Point(x + other.x, y + other.y)
+        }
+      }
+      
+      // 사용
+      val p1 = Point(10, 20)
+      val p2 = Point(30, 40)
+      println(p1 + p2) // Point(x=40, y=60)
+      ```
+
+  - 확장 함수로 `+` 연산자 구현하기
+
+    - ```kotlin
+      operator fun Point.plus(other: Point): Point {
+        return Point(x + other.x, y + other.y)
+      }
+      ```
+
+  - 확장 가능한 이항 산술 연산자
+
+    | 식    | 함수 이름         |
+    | ----- | ----------------- |
+    | a * b | times             |
+    | a / b | div               |
+    | a % b | mod (1.1부터 rem) |
+    | a + b | plus              |
+    | a - b | minus             |
+
+    - 위 연산자들만 오버로딩 가능하다
+    - 우선순위는 숫자에서의 우선순위와 같다. (`*, /, %`는 `+, -` 보다 높다)
+
+  - 두 피연산자가 같은 타입일 필요 없다
+
+    - ```kotlin
+      // 선언
+      operator fun Point.times(scale: Double): Point {
+        return Point((x * scale).toInt(), (y * scale).toInt())
+      }
+      
+      // 사용
+      val p = Point(10, 20)
+      println(p * 1.5) // Point(x=15, y=30)
+      ```
+
+    - 자동으로 교환법칙을 지원하진 않는다. `1.5 * p` 로도 쓰고 싶다면 `Double`의 확장함수로 따로 정의 필요하다
+
+  - 반환타입도 두 피연산자 중 하나와 일치할 필요 없다
+
+    - ```kotlin
+      operator fun Char.times(count: Int): String {
+        return toString().repeat(count)
+      }
+      
+      println('a' * 3) // aaa
+      ```
+
+- 복합 대입 연산자 오버로딩
+
+- 단항 연산자 오버로딩
+
+### 비교 연산자 오버로딩
+
+- 동등성 연산자: `equals`
+- 순서 연산자: `compareTo`
+
+### 컬렉션 범위에 대해 쓸 수 있는 관례
+
+- 인덱스로 원소에 접근: `get`과 `set`
+
+  - 인덱스 연산자를 사용해 원소를 읽는 연산은 `get`, 원소를 쓰는 연산은 `set` 연산자 메소드로 변환된다
+
+  - `Point` 클래스에 `get` 관례 구현하기
+
+    ```kotlin
+    // 선언
+    data class Point(val x: Int, val y: Int)
+    operator fun Point.get(index: Int): Int { // operator 변경자 필수
+      return when(index) {
+        0 -> x
+        1 -> y
+        else -> throw IndexOutOfBoundsException("Invalid coordinate $index")
+      }
+    }
+    
+    // 사용
+    val p = Point(10, 20)
+    println(p[1]) // p.get(1) 으로 변환되어 20 출력됨
+    ```
+
+    - 인덱스 연산자라고 해서 파라미터에 `Int`만 사용할 수 있는건 아니다. (ex: 맵의 인덱스 연산자의 파라미터 타입은 키의 타입이다.)
+    - 파라미터가 여러개일 수 있다 (ex: 행렬 클래스에서 `matrix[row, col]` 같이 사용할 수 있다)
+
+  - `Point` 클래스에 `set` 관례 구현하기
+
+    ```kotlin
+    // 선언
+    data class MutablePoint(var x: Int, var y: Int) // 변경을 위해 가변클래스로 선언
+    operator fun MutablePoint.set(index: Int, value: Int): Int { // operator 변경자 필수
+      return when(index) {
+        0 -> x = value
+        1 -> y = value
+        else -> throw IndexOutOfBoundsException("Invalid coordinate $index")
+      }
+    }
+    
+    // 사용
+    val p = MutablePoint(10, 20)
+    p[1] = 42 // p.set(1, 42) 로 변환됨
+    println(p) // MutablePoint(x=10, y=42)
+    ```
+
+    - set이 받는 마지막 파라미터값이 대입할 값, 나머지 파라미터는 인덱스 연산자로 컴파일된다
+
+- `in` 관례
+
+  - `in` : 객체가 컬렉션에 들어있는지 검사한다. `contains`와 대응된다
+
+  ```kotlin
+  // 선언
+  data class Rectangle(val upperLeft: Point, val lowerRight: Point)
+  operator fun Rectangle.contains(p: Point): Boolean {
+    return p.x in upperLeft.x until lowerRight.x && p.y in upperLeft.y until lowerRight.y
+  }
+  
+  // 사용
+  val rect = Rectangle(Point(10, 20), Point(50, 50))
+  println(Point(20, 30) in rect) // true
+  println(Point(5, 5) in rect) // false
+  ```
+
+- `rangeTo` 관례
+
+  - `..` 연산자로 `rangeTo` 함수를 간략하게 표현할 수 있다
+
+  - `rangeTo`는 범위를 반환한다
+
+  - 어떤 클래스가 `Comparable`을 구현하고 있으면 `rangeTo`를 정의할 필요 없다
+
+    - `Comparable`에 이미 `rangeTo` 함수가 있다.
+    - `operator fun <T: Comparable<T>> T.rangeTo(that: T) : ClosedRange<T>`
+
+  - `LocalDate`와 `in`을 사용하여 범위 검사하기
+
+    ```kotlin
+    val now = LocalDate.now()
+    val vacation = now..now.plusDays(10) // now.rangeTo(now.plusDays(10))로 변환됨
+    println(now.plusWeeks(1) in vacation) // true
+    ```
+
+  - `rangeTo` 연산자는 우선순위가 낮다
+
+    ```kotlin
+    val n = 9
+    
+    // 아래 두 식은 같지만 두번째 식이 더 명확하다
+    println(0..n + 1) // 0..10
+    println(0..(n + 1)) // 0..10
+    
+    0..n.forEach { print(it) } // 컴파일 에러
+    (0..n).forEach { print(it) } // 0123456789
+    ```
+
+- `for` 루프를 위한 `iterator` 관례
+
+  - `for (x in list) { ... }` 와 같이 for문 안에 in을 쓰려면 `list` 가 `iterator` 메소드를 구현해야 한다
+
+  - 코틀린 표준 라이브러리가 `String`의 상위 클래스인 `CharSequence`에 대한 `iterator` 확장함수를 제공하기 때문에 String을 이터레이션 할 수 있다
+
+    ```kotlin
+    operator fun CharSequence.iterator(): CharIterator
+    
+    for (c in "abc") { ... }
+    ```
+
+  - 날짜에 대해 이터레이션하기
+
+    ```kotlin
+    // 선언
+    operator fun ClosedRange<LocalDate>.iterator(): Iterator<LocalDate> = 
+      object : Iterator<LocalDate> {
+        var current = start
+        override fun hasNext() = current <= endInclusive
+        override fun next() = current.apply {
+          current = plusDays(1)
+        }
+      }
+    
+    // 사용
+    val newYear = LocalDate.ofYearDay(2017, 1)
+    val daysOff = newYear.minusDays(1)..newYear // daysOff는 ClosedRange의 인스턴스
+    for (dayOff in daysOff) { println(dayOff) } // 2016-12-31\n2017-01-01\n
+    ```
+
+    
+
+### 구조 분해 선언과 component 함수
+
+- 구조 분해 선언과 루프
+
+### 프로퍼티 접근자 로직 재활용: 위임 프로퍼티
+
+- 위임 프로퍼티 소개
+- 위임 프로퍼티 사용: by lazy()를 사용한 프로퍼티 초기화 지연
+- 위임 프로퍼티 구현
+- 위임 프로퍼티 컴파일 규칙
+- 프로퍼티 값을 맵에 저장
+- 프레임워크에서 위임 프로퍼티 활용
+
 <br/>
 
 ## 8장. 고차 함수: 파라미터와 반환 값으로 람다 사용
