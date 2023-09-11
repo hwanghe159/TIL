@@ -2046,6 +2046,67 @@
 
 ## 10장. 애노테이션과 리플렉션
 
+- 개요
+  - 애노테이션과 리플렉션을 사용하면 함수나 클래스 이름을 소스코드에서 정확히 알고 있지 않아도 사용할 수 있다
+  - 애노테이션 -> 라이브러리가 요구하는 의미를 클래스에게 부여할 수 있다
+  - 리플렉션 -> 실행 시점에 컴파일러 내부 구조를 분석할 수 있다
+
+### 애노테이션 선언과 적용
+
+- 애노테이션 적용하기
+
+  - 예시 : `MutableList.remove` 에 적용된 `@Deprecated`
+
+    ```kotlin
+    @Deprecated("Use removeAt(index) instead.", ReplaceWith("removeAt(index)"))
+    fun remove(index: Int) { ... }
+    ```
+
+    - intellij에선 `remove`를 사용하면 경고 메시지를 띄우고, 권장되는 `removeAt`로 자동으로 바꿔주는 기능도 제공한다
+
+  - 애노테이션의 인자로 들어갈 수 있는 것들 (컴파일 시점에 알 수 있어야 하므로 상수만 가능)
+
+    - 클래스 참조 : `@MyAnnotation(MyClass::class)` 와 같이 `::class`를 붙여야 한다
+    - 다른 애노테이션 : `@`를 넣으면 안된다. 위 예시에서 `ReplaceWith`은 다른 애노테이션이다
+    - 배열 : `@RequestMapping(path=arrayOf("/foo", "/bar"))` 처럼 `arrayOf`를 사용한다
+    - 원시타입의 값, 문자열, enum
+
+- 애노테이션 대상 지정하기
+
+  - `사용 지점 대상` 선언으로 애노테이션을 붙일 요소를 정할 수 있다
+
+  - 예시 : 프로퍼티가 아닌 게터에 `@Rule` 어노테이션 적용하기
+
+    ```kotlin
+    class HasTempFolder {
+        // @Rule 애노테이션을 게터에 적용하라는 뜻.
+        // @Rule 어노테이션은 public에만 붙일수 있으므로 대상을 지정하기 않으면 예외가 발생한다
+        @get:Rule
+        val folder = TemporaryFolder()
+        @Test
+        fun testUsingTempFolder() { ... }
+    }
+    ```
+
+  - 지원하는 대상 목록
+
+    - property, field, get, set, receiver, param, setparam, delegate, file
+    - 예시 : `@file:JvmName("StringFunctions")`
+
+- 애노테이션을 활용한 JSON 직렬화 제어
+
+  - 
+
+- 애노테이션 선언
+
+- 메타애노테이션: 애노테이션을 처리하는 방법 제어
+
+- 애노테이션 파라미터로 클래스 사용
+
+- 애노테이션 파라미터로 제네릭 클래스 받기
+
+### 리플렉션: 실행 시점에 코틀린 객체 내부 관찰
+
 <br/>
 
 ## 11장. DSL 만들기
