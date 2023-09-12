@@ -2095,15 +2095,134 @@
 
 - 애노테이션을 활용한 JSON 직렬화 제어
 
-  - 
+  - 직렬화/역직렬화 예시
+
+    ```kotlin
+    data class Person(val name: String, val age: Int)
+    ```
+
+    ```kotlin
+    val person = Person("Alice", 29)
+    println(serialize(person)) // {"age": 29, "name": "Alice"}
+    
+    val json = """{"name":"Alice", "age":29}"""
+    println(deserialize<Person>(json)) // Person(name=Alice, age=29)
+    ```
+
+  - `@JsonExclude` 와 `@JsonName`을 활용하여 제어하기
+
+    ```kotlin
+    data class Person2(
+        @JsonName("alias") val firstName: String, // 키 이름을 지정한다.
+        @JsonExclude val age: Int? = null // 직렬화/역직렬화 시 무시한다. 반드시 디폴트값을 지정해야 한다.(역직렬화할때 인스턴스를 만들 수 없으므로)
+    )
+    ```
+
+    ```kotlin
+    val person2 = Person2("junho", 28)
+    println(serialize(person2)) // {"alias": "junho"}
+    
+    val json2 = """{"alias": "junho"}"""
+    println(deserialize<Person2>(json2)) // Person2(firstName=junho, age=null)
+    ```
 
 - 애노테이션 선언
 
-- 메타애노테이션: 애노테이션을 처리하는 방법 제어
+  - `@JsonExclude` (파라미터가 없는 애노테이션)
+
+    ```kotlin
+    annotation class JsonExclude
+    ```
+
+    - 애노테이션 선언 구문은 `class` 앞에 `annotation` 이 붙는다
+    - 애노테이션에서는 본문을 정의할 수 없다
+
+  - `@JsonName` (파라미터가 있는 애노테이션)
+
+    ```kotlin
+    annotation class JsonName(val name: String)
+    ```
+
+    - 파라미터가 있는 애노테이션을 정의하려면 주 생성자에 파라미터를 선언해야 한다
+    - 모든 파라미터 앞에 `val`을 붙여야 한다
+    - 자바 어노테이션에서는 `value` 애트리뷰트만 이름을 생략할 수 있지만 코틀린 애노테이션은 모두 생략할 수 있다
+    - 자바 어노테이션을 코틀린에서 사용할땐 `value` 애트리뷰트만 이름을 생략할 수 있다
+
+- 메타애노테이션
+
+  - 메타 애노테이션? 애노테이션 클래스에 적용할 수 있는 애노테이션. 컴파일러가 애노테이션을 처리하는 방법을 제어한다.
+
+    ```kotlin
+    @Target(AnnotationTarget.PROPERTY) // 적용 가능 대상을 지정한다. 지정하지 않으면 모든 선언에 적용할 수 있다는 뜻.
+    annotation class JsonExclude
+    ```
+
+  - 대상은 클래스, 파일, 프로퍼티, 프로퍼티 접근자, 타입, 식 등이 될 수 있다 (`AnnotationTarget`)
+
+  - `@Target(AnnotationTarget.CLASS, AnnotationTarget.METHOD)` 처럼 둘 이상을 지정할 수 있다
+
+  - 메타 애노테이션을 직접 만들어야 한다면 `@Target(AnnotationTarget.ANNOTATION_CLASS)` 으로 지정하면 된다
+
+  - `PROPERTY`로 지정하면 자바 코드에서 사용할 수 없다. 자바에서 사용하려면 `FIELD`를 추가로 지정해야 한다
 
 - 애노테이션 파라미터로 클래스 사용
 
+  - 클래스 참조를 파라미터로 하는 애노테이션을 선언할 수 있다
+
+    ```kotlin
+    interface Company {
+        val name: String
+    }
+    data class CompanyImpl(override val name: String) : Company
+    ```
+
+    ```kotlin
+    data class Person3(
+        val name: String,
+        // 역직렬화할때 CompanyImpl 인스턴스를 만든다. 클래스 이름 뒤에 ::class를 붙여야 한다.
+        @DeserializeInterface(CompanyImpl::class) val company: Company
+    )
+    ```
+
+    ```kotlin
+    // 코틀린 클래스에 대한 참조를 나타낼 때 KClass 타입을 사용한다
+    annotation class DeserializeInterface(val targetClass: KClass<out Any>)
+    ```
+
+    ```kotlin
+    val json3 = """{"company": {"name": "backpackr"}, "name": "junho"}"""
+    println(deserialize<Person3>(json3)) // Person3(name=junho, company=CompanyImpl(name=backpackr))
+    ```
+
 - 애노테이션 파라미터로 제네릭 클래스 받기
+
+  ```kotlin
+  data class Person4(
+      val name: String,
+      @CustomSerializer(DateSerializer::class) val birthDate: Date
+  )
+  ```
+
+  ```kotlin
+  // @CustomSerializer가 ValueSerializer를 구현한 클래스만 받을 수 있다는 것을 명시
+  annotation class CustomSerializer(val serializerClass: KClass<out ValueSerializer<*>>)
+  ```
+
+  ```kotlin
+  object DateSerializer : ValueSerializer<Date> {
+      private val dateFormat = SimpleDateFormat("dd-mm-yyyy")
+      override fun toJsonValue(value: Date): Any? = dateFormat.format(value)
+      override fun fromJsonValue(jsonValue: Any?): Date = dateFormat.parse(jsonValue as String)
+  }
+  ```
+
+  ```kotlin
+  val person4 = Person4("junho", SimpleDateFormat("dd-mm-yyyy").parse("14-03-1995"))
+  println(serialize(person4)) // {"birthDate": "14-03-1995", "name": "junho"}
+  ```
+
+  
+
 
 ### 리플렉션: 실행 시점에 코틀린 객체 내부 관찰
 
