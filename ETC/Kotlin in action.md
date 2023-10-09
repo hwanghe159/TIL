@@ -2185,13 +2185,13 @@
     ```
 
     ```kotlin
-    // 코틀린 클래스에 대한 참조를 나타낼 때 KClass 타입을 사용한다
-    annotation class DeserializeInterface(val targetClass: KClass<out Any>)
+    val json3 = """{"company": {"name": "backpackr"}, "name": "junho"}"""
+    println(deserialize<Person3>(json3)) // Person3(name=junho, company=CompanyImpl(name=backpackr))
     ```
 
     ```kotlin
-    val json3 = """{"company": {"name": "backpackr"}, "name": "junho"}"""
-    println(deserialize<Person3>(json3)) // Person3(name=junho, company=CompanyImpl(name=backpackr))
+    // 코틀린 클래스에 대한 참조를 나타낼 때 KClass 타입을 사용한다
+    annotation class DeserializeInterface(val targetClass: KClass<out Any>)
     ```
 
 - 애노테이션 파라미터로 제네릭 클래스 받기
@@ -2201,11 +2201,6 @@
       val name: String,
       @CustomSerializer(DateSerializer::class) val birthDate: Date
   )
-  ```
-
-  ```kotlin
-  // @CustomSerializer가 ValueSerializer를 구현한 클래스만 받을 수 있다는 것을 명시
-  annotation class CustomSerializer(val serializerClass: KClass<out ValueSerializer<*>>)
   ```
 
   ```kotlin
@@ -2221,7 +2216,10 @@
   println(serialize(person4)) // {"birthDate": "14-03-1995", "name": "junho"}
   ```
 
-  
+  ```kotlin
+  // @CustomSerializer가 ValueSerializer를 구현한 클래스만 받을 수 있다는 것을 명시
+  annotation class CustomSerializer(val serializerClass: KClass<out ValueSerializer<*>>)
+  ```
 
 
 ### 리플렉션: 실행 시점에 코틀린 객체 내부 관찰
