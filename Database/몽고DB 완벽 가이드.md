@@ -95,13 +95,160 @@
 	  
 	  // 다건 삭제
 	  > db.movies.deleteMany({"year": 1984})
+	  
+	  // 모든 도큐먼트 제거 (복구 불가)
+	  > db.movies.deleteMany({})
+	  > db.movies.drop()
+		```
+- 도큐먼트 갱신
+	- 갱신은 원자적으로 이루어진다
+	  ```
+	  // 도큐먼트 치환
+	  > joe = db.people.findOne({"name": "joe", "age": 20});
+	  > joe.age++;
+	  > db.people.replaceOne({"_id": ObjectId("...")}, joe); // 필터조건은 id가 좋다
+	  
+	  // 도큐먼트 갱신
+	  db.analytics.updateOne({"url": "www.example.com"}, 
+	                         {"$inc": {"pageviews": 1}});
+	  
+	  // 필드값 설정 (없으면 생성)
+	  db.users.updateOne({"_id": ObjectId("...")}, 
+	                     {"$set": {"favorite book": "war and peace"}});
+	  
+	  // 내장 도큐먼트 데이터 수정
+	  db.blog.posts.updateOne({"author.name": "joe"}, 
+	                     {"$set": {"author.name": "joe schmoe"}});
+	  
+	  // 필드값 제거
+	  db.users.updateOne({"name": "joe"}, 
+	                     {"$unset": {"favorite book": 1}});
+	  
+	  // 증가, 감소 (없으면 생성)
+	  db.games.updateOne({"game": "pinball", "user": "joe"}, 
+	                     {"$inc": {"score": 50}});
+	  
+	  // 요소 추가
+	  db.blog.posts.updateOne({"title": "a blog post"}, 
+	                          {"$push": {"comments": {
+						                       "name": "joe",
+						                       "email": "joe@example.com",
+						                       "content": "nice post"
+					                    }}});
+	  
+	  // 요소 여러개 한번에 추가
+	  db.stock.ticker.updateOne({"_id": "GOOG"}, 
+	                          {"$push": {"hourly": {"$each": [500, 600, 700]}}});
+
+	  // 배열을 특정 길이로 유지
+	  db.movies.updateOne({"genre": "horror"}, 
+						  {"$push": {"top10": {"$each": ["saw", "nightmare"], 
+											  "$slice": -10,
+											  "$sort": {"rating": -1}}}});
+
+	   // 배열을 집합으로 사용
+	   db.papers.updateOne({"authors cited": {"$ne", "richie"}},
+	                       {"$push: {"authors cited": "richie"}})
+	   db.users.updateOne({"_id": ObjectId("...")},
+	                       {"$addToSet: {"emails": "joe@gmail.com"}})
+	   db.users.updateOne({"_id": ObjectId("...")},
+	                      {"$addToSet: {"emails": {"$each": ["joe@a.com", "joe@b.com", "joe@c.com"]}}})
+
+	   // 배열의 마지막부터 요소 제거
+	   {"$pop": {"key": 1}}
+	   // 배열의 처음부터 요소 제거
+	   {"$pop": {"key": -1}}
+	   // 조건으로 배열 요소 제거
+	   {"$pull": {"todo": "laundry"}}
+	   // 배열 내 데이터 수정
+	   db.blog.updateOne({"comments.author": "john"}, 
+	                 {"$set": {"comments.$.author": "jim"}})
+	   // 필터로 갱신 (반대표가 5표 이상인 댓글 숨기기)
+	   db.blog.updateOne({"_id": ObjectId(...)}, 
+	                 {"$set": {"comments.$[elem].hidden": true}},
+	                 {arrayFilters: [{"elem.votes": { $lte: -5 }}]})
+	  
+	   // upsert (없으면 추가, 있으면 조회수+1)
+	   db.analytics.updateOne({"url": "/blog"}, 
+	                         {"$inc": {"pageviews": 1}},
+	                         {"upsert": true})
+	   // 조회 + 갱신
+	   db.processes.findOneAndUpdate({"state": "READY"},
+	                                 {"$set": {"state": "RUNNING"}},
+	                                 {"sort": {"priority": -1},
+	                                 "returnNewDocument": true}) // 없으면 변경전 리턴함
 		```
 
 ## CHAPTER 4 쿼리  
+- find()
+- `db.collection.find( <query>, <projection>, <options> )`
+	- query : 쿼리 도큐먼트
+		- 각 조건은 AND으로 해석됨
+		- 빈 도큐먼트 {}으로 조회 시 모든 도큐먼트 반환 
+		- 값은 반드시 상수여야 한다
+		- 쿼리 조건
+			- $lt, $lte, $gt, $gte, $eq, $ne, $in, $nin, $or, $not
+           ```
+           // 18 <= age <= 30
+           > db.users.find({"age": {"$gte": 18, "$lte": 30}})
+		  
+           // ticket_no=100 OR ticket_no=200 OR ticket_no=300
+           > db.raffle.find({"ticket_no": {"$in": [100, 200, 300]}})
+		  
+           // ticket_no!=100 AND ticket_no!=200 AND ticket_no!=300
+           > db.raffle.find({"ticket_no": {"$nin": [100, 200, 300]}})
+		  
+           // ticket_no=700 OR winner=true
+           > db.users.find({"$or": [{"ticket_no"; 700}, {"winner": true}])
+		  
+           // id_num을 5로 나눴을때 나머지가 1이 아닌 사용자
+           > db.users.find({"id_num": {"$not": {"$mod": [5,1]}}})
+           ```
+			- $exists, $regex, $all, $size
+           ```
+           // z키가 존재하고, z=null
+           db.c.find({"z": {"$eq": null, "$exists": true}})
 
+           // toLowerCase(name)='joe' (PCRE 문법을 따른다)
+           db.users.find({"name": {"$regex": /joe/i }})
+           
+           // "apple" in fruit AND "banana" in fruit
+           db.food.find({"fruit": {$all: ["apple", "banana"]}])
+           
+           // fruit.size=3
+           db.food.find({"fruit": {"$size": 3}])
+           ```
+			- $elemMatch
+           ```
+           {"x": 5}
+           {"x": 15}
+           {"x": 25}
+           {"x": [5, 25]}
+       
+           // 결과 없음
+           db.test.find({"x": {"$elemMatch": {"$gt":10, "$lt":20}}})
+           ```
+	- projection : 반환할 키 지정
+		- `db.users.find({}, {"username": 1, "_id": 0})` -> username 포함, id 제외
+		-  $slice, $
+           ```
+           // 먼저 달린 댓글 10개
+           db.blog.posts.findOne(<query>, {"comments": {"$slice": 10}})
+           
+           // 나중에 달린 댓글 10개
+           db.blog.posts.findOne(<query>, {"comments": {"$slice": -10}})
+           
+           // 24번째부터 33번째까지 (10개)
+           db.blog.posts.findOne(<query>, {"comments": {"$slice": [23, 10]}})
+           
+           // comments[?].name=bob 을 만족
+           db.blog.posts.find({"comments.name: "bob"}, {"comments.$": 1})
+           ```
+	- options : 추가 옵션
 
 # PART II 몽고DB 개발  
-## CHAPTER 5 인덱싱  
+## CHAPTER 5 인덱싱
+
 ## CHAPTER 6 특수 인덱스와 컬렉션 유형  
 ## CHAPTER 7 집계 프레임워크  
 ## CHAPTER 8 트랜잭션  
